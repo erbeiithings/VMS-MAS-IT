@@ -18,5 +18,9 @@ foreach ($dirs as $dir) {
 // 2. Beri penanda rahasia kalau kita sedang berjalan di Vercel
 $_SERVER['IS_VERCEL'] = true;
 
+putenv('SESSION_DRIVER=cookie');
+putenv('SESSION_DOMAIN=' . $_SERVER['HTTP_HOST']); // Otomatis ngebaca domain vercel lu
+putenv('SESSION_SECURE_COOKIE=true');
+
 // 3. Lanjutkan ke sistem utama Laravel
 require __DIR__ . '/../public/index.php';
