@@ -1,6 +1,6 @@
 <?php
 
-// 1. Buat struktur folder bayangan di folder memori sementara (/tmp) milik Vercel
+// 1. Bikin folder bayangan biar sistem Vercel nggak ngambek (bisa nulis cache)
 $dirs = [
     '/tmp/storage/logs',
     '/tmp/storage/framework/views',
@@ -15,12 +15,13 @@ foreach ($dirs as $dir) {
     }
 }
 
-// 2. Beri penanda rahasia kalau kita sedang berjalan di Vercel
+// 2. Paksa sesi pakai cookie
+putenv('SESSION_DRIVER=cookie');
+putenv('CACHE_DRIVER=array');
+
+// 3. INI OBAT UTAMANYA: Tricking Laravel biar ngira dia dapet request HTTPS murni
+$_SERVER['HTTPS'] = 'on';
 $_SERVER['IS_VERCEL'] = true;
 
-putenv('SESSION_DRIVER=cookie');
-putenv('SESSION_DOMAIN=' . $_SERVER['HTTP_HOST']); // Otomatis ngebaca domain vercel lu
-putenv('SESSION_SECURE_COOKIE=true');
-
-// 3. Lanjutkan ke sistem utama Laravel
+// 4. Lanjut jalanin webnya
 require __DIR__ . '/../public/index.php';
