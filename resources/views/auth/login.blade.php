@@ -87,26 +87,6 @@
                 Masuk ke Sistem
             </button>
         </form>
-
-        <!-- Dummy Account Quick Guide -->
-        <div class="mt-8 pt-6 border-t border-slate-800 text-[11px] text-slate-400">
-            <p class="font-medium text-slate-300 mb-2">Akun Uji Coba (Password: password123):</p>
-            <div class="grid grid-cols-3 gap-2 text-center">
-                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-800">
-                    <p class="text-blue-400 font-semibold">Kepala</p>
-                    <p class="text-slate-500 text-[10px]">user: kepala</p>
-                </div>
-                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-800">
-                    <p class="text-indigo-400 font-semibold">Pimpinan</p>
-                    <p class="text-slate-500 text-[10px]">user: pimpinan</p>
-                </div>
-                <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-800">
-                    <p class="text-sky-400 font-semibold">Engineer</p>
-                    <p class="text-slate-500 text-[10px]">user: engineer1</p>
-                </div>
-            </div>
-        </div>
-
     </div>
 </body>
 </html>
