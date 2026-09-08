@@ -41,4 +41,10 @@ class Kunjungan extends Model
     {
         return $this->hasOne(Laporan::class, 'id_kunjungan', 'id_kunjungan');
     }
+
+    // TAMBAHAN BARU: Relasi ke tabel pengeluaran
+    public function pengeluaran()
+    {
+        return $this->hasMany(Pengeluaran::class, 'id_kunjungan', 'id_kunjungan');
+    }
 }

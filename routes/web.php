@@ -60,6 +60,11 @@ Route::middleware(['auth'])->prefix('kunjungan')->name('kunjungan.')->group(func
     Route::middleware(['role:Engineer'])->group(function () {
         Route::post('/{id}/checkin', [KunjunganController::class, 'checkIn'])->name('checkin');
         Route::post('/{id}/dokumentasi', [KunjunganController::class, 'uploadDokumentasi'])->name('dokumentasi');
+        Route::post('/{id}/pengeluaran', [KunjunganController::class, 'storePengeluaran'])->name('pengeluaran');
+        
+        // Rute untuk Engineer menolak/reschedule jadwal
+        Route::post('/{id}/reschedule', [KunjunganController::class, 'reschedule'])->name('reschedule');
+        
         Route::post('/{id}/checkout', [KunjunganController::class, 'checkOut'])->name('checkout');
     });
 
@@ -67,8 +72,19 @@ Route::middleware(['auth'])->prefix('kunjungan')->name('kunjungan.')->group(func
     Route::post('/{id}/signature', [KunjunganController::class, 'verifySignature'])->name('signature');
 });
 
-// Rute Laporan & Cetak PDF (Akses semua pengguna terautentikasi)
+// Rute Laporan, Cetak PDF, dan Approval (Akses semua pengguna terautentikasi)
 Route::middleware(['auth'])->prefix('laporan')->name('laporan.')->group(function () {
     Route::get('/', [LaporanController::class, 'index'])->name('index');
     Route::get('/{id}/pdf', [LaporanController::class, 'downloadPdf'])->name('pdf');
+    Route::post('/{id}/approve', [LaporanController::class, 'updateApproval'])->name('approve');
+});
+
+// Rute Laporan, Cetak PDF, dan Approval (Akses semua pengguna terautentikasi)
+Route::middleware(['auth'])->prefix('laporan')->name('laporan.')->group(function () {
+    Route::get('/', [LaporanController::class, 'index'])->name('index');
+    Route::get('/{id}/pdf', [LaporanController::class, 'downloadPdf'])->name('pdf');
+    Route::post('/{id}/approve', [LaporanController::class, 'updateApproval'])->name('approve');
+    
+    // TAMBAHAN BARU: Route untuk kirim email
+    Route::post('/{id}/email', [LaporanController::class, 'sendEmail'])->name('email');
 });

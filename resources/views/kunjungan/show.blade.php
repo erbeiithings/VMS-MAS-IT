@@ -55,19 +55,44 @@
         </div>
     </div>
 
-    <!-- SECTION 1: Check-in GPS (Hanya muncul jika status Terjadwal & user adalah Engineer) -->
+    <!-- SECTION 1: Check-in GPS & Tombol Tolak Jadwal (Hanya muncul jika status Terjadwal & user adalah Engineer) -->
     @if(Auth::user()->id_role == 3 && $kunjungan->status == 'Terjadwal')
-        <div class="p-6 rounded-2xl bg-gradient-to-r from-blue-950/40 to-slate-900 border border-blue-500/30 text-center space-y-3">
-            <h4 class="text-sm font-bold text-white">Anda Sudah Tiba di Lokasi Klien?</h4>
-            <p class="text-xs text-slate-400 max-w-md mx-auto">Klik tombol di bawah ini untuk mencatat koordinat GPS dan memulai pengerjaan on-site.</p>
-            
-            <form id="formCheckIn" action="{{ route('kunjungan.checkin', $kunjungan->id_kunjungan) }}" method="POST">
-                @csrf
-                <input type="hidden" name="lokasi_gps" id="lokasi_gps">
-                <button type="button" onclick="getGPSLocation()" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/40 transition">
-                    📍 Ambil Lokasi GPS & Check-In Sekarang
-                </button>
-            </form>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Kotak Check-In -->
+            <div class="p-6 rounded-2xl bg-gradient-to-r from-blue-950/40 to-slate-900 border border-blue-500/30 text-center space-y-3">
+                <h4 class="text-sm font-bold text-white">Sudah Tiba di Lokasi Klien?</h4>
+                <p class="text-xs text-slate-400">Klik tombol di bawah ini untuk mencatat koordinat GPS dan memulai pengerjaan.</p>
+                
+                <form id="formCheckIn" action="{{ route('kunjungan.checkin', $kunjungan->id_kunjungan) }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="lokasi_gps" id="lokasi_gps">
+                    <button type="button" onclick="getGPSLocation()" class="w-full px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/40 transition">
+                        📍 Ambil Lokasi GPS & Check-In
+                    </button>
+                </form>
+            </div>
+
+            <!-- Kotak Tolak / Reschedule Jadwal (Insight Mentor) -->
+            <div class="p-6 rounded-2xl bg-gradient-to-r from-rose-950/40 to-slate-900 border border-rose-500/30 space-y-3">
+                <h4 class="text-sm font-bold text-white">Jadwal Bentrok / Berhalangan?</h4>
+                <p class="text-xs text-slate-400">Tolak jadwal ini dan berikan alasan agar Pimpinan bisa melakukan penjadwalan ulang.</p>
+                
+                <form action="{{ route('kunjungan.reschedule', $kunjungan->id_kunjungan) }}" method="POST" class="space-y-2">
+                    @csrf
+                    <input type="text" name="alasan_reschedule" required placeholder="Alasan (Contoh: Jadwal bentrok / sakit)" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
+                   <button type="button" onclick="if(!this.form.checkValidity()) { this.form.reportValidity(); return; } showConfirmModal(this.form, 'Tolak & Reschedule', 'Apakah Anda yakin ingin menolak dan meminta reschedule jadwal ini?')" class="w-full py-2.5 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 rounded-xl text-xs font-bold transition">
+                   ❌ Tolak & Minta Reschedule
+                   </button>
+                </form>
+            </div>
+        </div>
+    @endif
+
+    <!-- Jika statusnya sudah Reschedule, tampilkan pesannya ke semua orang -->
+    @if($kunjungan->status == 'Reschedule')
+        <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex flex-col gap-1">
+            <span class="font-bold">⚠️ Status: Jadwal Perlu Dijadwalkan Ulang (Reschedule)</span>
+            <p>Alasan penolakan dari Engineer: "{{ $kunjungan->alasan_reschedule }}"</p>
         </div>
     @endif
 
@@ -103,20 +128,65 @@
         </div>
     @endif
 
+    <!-- SECTION 2.5: Form Pencatatan Pengeluaran (Expense) -->
+    @if(Auth::user()->id_role == 3 && $kunjungan->status == 'Dikerjakan')
+        <div class="p-5 md:p-6 rounded-2xl bg-white/[0.03] border border-slate-800/80 space-y-4">
+            <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                💸 Catat Pengeluaran Operasional
+            </h4>
+            <form action="{{ route('kunjungan.pengeluaran', $kunjungan->id_kunjungan) }}" method="POST" enctype="multipart/form-data" class="space-y-3 text-xs">
+                @csrf
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Jenis Biaya</label>
+                        <select name="jenis_biaya" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                            <option value="Bensin">Bensin / BBM</option>
+                            <option value="Tol">Tol</option>
+                            <option value="Parkir">Parkir</option>
+                            <option value="Makan">Makan (Konsumsi)</option>
+                            <option value="Pembelian Alat">Pembelian Alat Dadakan</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Nominal (Rp)</label>
+                        <input type="number" name="nominal" min="0" required placeholder="Contoh: 50000" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Bukti Foto Nota / Struk (Opsional)</label>
+                        <input type="file" name="bukti_nota" accept="image/*" capture="environment" class="w-full text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:bg-blue-600 file:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Keterangan Tambahan</label>
+                        <input type="text" name="keterangan" placeholder="Contoh: Beli kabel LAN 5 meter" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                    </div>
+                </div>
+                <button type="submit" class="px-5 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-medium">Simpan Pengeluaran</button>
+            </form>
+        </div>
+    @endif
+
     <!-- SECTION 3: Form Pembuatan Laporan Siap Pakai (Engineer Input Deskripsi) -->
     @if(Auth::user()->id_role == 3 && $kunjungan->status == 'Dikerjakan')
         <div class="p-5 md:p-6 rounded-2xl bg-white/[0.03] border border-blue-500/40 space-y-4">
-            <h4 class="text-sm font-bold text-white">📝 Input Catatan & Hasil Pekerjaan Kunjungan</h4>
-            <p class="text-xs text-slate-400">Tuliskan ringkasan hasil pengerjaan di bawah ini. Sistem otomatis memasukkannya ke dalam template resmi laporan MAS-IT.</p>
+            <h4 class="text-sm font-bold text-white">📝 Input Catatan & Check-Out</h4>
+            <p class="text-xs text-slate-400">Tuliskan ringkasan hasil pengerjaan. Sistem akan memverifikasi lokasi GPS Anda untuk proses Check-Out.</p>
             
             <form id="formCheckOut" action="{{ route('kunjungan.checkout', $kunjungan->id_kunjungan) }}" method="POST" class="space-y-3 text-xs">
                 @csrf
+                <!-- Input hidden untuk nyimpen koordinat GPS saat Check-out -->
+                <input type="hidden" name="lokasi_gps" id="lokasi_gps_checkout"> 
+                
                 <div>
                     <label class="block text-slate-300 font-medium mb-1">Deskripsi / Hasil Pekerjaan Lapangan:</label>
-                    <textarea name="catatan" rows="4" required placeholder="Contoh: Pemeliharaan berkala server dan perapihan cabling rack selesai 100%. Uji konektivitas normal tanpa packet loss." class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
+                    <textarea name="catatan" id="catatan_pekerjaan" rows="4" required placeholder="Contoh: Pemeliharaan berkala server dan perapihan cabling rack selesai 100%." class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
                 </div>
-                <button type="button" onclick="showConfirmModal(this.form, 'Terbitkan Template Laporan', 'Apakah catatan hasil pekerjaan sudah lengkap dan siap untuk ditandatangani oleh customer?')" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30 transition">
-                    ✔ Buat Laporan & Buka Kolom TTD Customer
+                
+                <!-- Tombolnya diubah panggil fungsi JS getGPSCheckout() -->
+                <button type="button" onclick="getGPSCheckout()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30 transition">
+                    📍 Ambil GPS Check-Out & Buat Laporan
                 </button>
             </form>
         </div>
@@ -165,7 +235,7 @@
         </div>
     @endif
 
-    <!-- SECTION 6: Detail Informasi Tiket, Tools & Galeri Foto (Dilihat oleh Semua Role) -->
+    <!-- SECTION 6: Detail Informasi Tiket, Tools & Log GPS -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Informasi Kunjungan & Alat -->
         <div class="p-5 rounded-2xl bg-white/[0.03] border border-slate-800/80 space-y-3 text-xs">
@@ -198,6 +268,54 @@
         </div>
     </div>
 
+    <!-- TAMPILAN BARU: Tabel Rincian Pengeluaran -->
+    <div class="p-5 md:p-6 rounded-2xl bg-white/[0.03] border border-slate-800/80">
+        <h4 class="text-sm font-semibold text-slate-200 mb-4">Rincian Pengeluaran Operasional</h4>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+                <thead class="text-[11px] uppercase bg-slate-900/80 text-slate-400 border-b border-slate-800">
+                    <tr>
+                        <th class="p-3">Jenis Biaya</th>
+                        <th class="p-3">Nominal (Rp)</th>
+                        <th class="p-3">Keterangan</th>
+                        <th class="p-3">Bukti Nota</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/60">
+                    @php $totalPengeluaran = 0; @endphp
+                    @forelse($kunjungan->pengeluaran as $peng)
+                        @php $totalPengeluaran += $peng->nominal; @endphp
+                        <tr class="hover:bg-slate-800/20">
+                            <td class="p-3 font-semibold text-white">{{ $peng->jenis_biaya }}</td>
+                            <td class="p-3 text-emerald-400">Rp {{ number_format($peng->nominal, 0, ',', '.') }}</td>
+                            <td class="p-3">{{ $peng->keterangan ?? '-' }}</td>
+                            <td class="p-3">
+                                @if($peng->bukti_nota)
+                                    <a href="{{ asset($peng->bukti_nota) }}" target="_blank" class="text-blue-400 hover:underline">Lihat Foto</a>
+                                @else
+                                    <span class="text-slate-500 italic">Tidak ada struk</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="p-4 text-center text-slate-500 italic">Belum ada catatan pengeluaran.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+                @if($totalPengeluaran > 0)
+                    <tfoot>
+                        <tr class="bg-slate-900/50 font-bold">
+                            <td class="p-3 text-right text-white">TOTAL KESELURUHAN:</td>
+                            <td class="p-3 text-emerald-400 text-sm">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                @endif
+            </table>
+        </div>
+    </div>
+
     <!-- Galeri Foto Lapangan -->
     <div class="p-5 md:p-6 rounded-2xl bg-white/[0.03] border border-slate-800/80">
         <h4 class="text-sm font-semibold text-slate-200 mb-4">Galeri Dokumentasi On-Site</h4>
@@ -222,15 +340,21 @@
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 <script>
     function getGPSLocation() {
+        const catatan = document.getElementById('catatan_pekerjaan').value;
+        if (!catatan.trim()) {
+            alert('Harap isi deskripsi hasil pekerjaan terlebih dahulu!');
+            return;
+        }
+
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const coords = `${position.coords.latitude}, ${position.coords.longitude}`;
-                    document.getElementById('lokasi_gps').value = coords;
+                    document.getElementById('lokasi_gps_checkout').value = coords;
                     showConfirmModal(
-                        document.getElementById('formCheckIn'),
-                        'Konfirmasi Check-in',
-                        `Koordinat GPS terdeteksi: ${coords}. Mulai pengerjaan sekarang?`
+                        document.getElementById('formCheckOut'),
+                        'Konfirmasi Check-Out',
+                        `Koordinat GPS Check-Out terdeteksi: ${coords}. Apakah Anda yakin ingin mengakhiri pekerjaan ini?`
                     );
                 },
                 (error) => {
