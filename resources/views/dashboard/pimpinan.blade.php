@@ -36,7 +36,8 @@
             <h4 class="text-base font-semibold text-white">Buat Jadwal Kunjungan Baru</h4>
             <p class="text-xs text-slate-300 mt-1">Jadwalkan kunjungan teknis ke lokasi customer dan tugaskan engineer.</p>
         </div>
-        <button class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-blue-600/30 transition">
+        <!-- INI TOMBOLNYA UDAH DITAMBAHIN ONCLICK BIAR BISA PINDAH HALAMAN -->
+        <button onclick="window.location.href='{{ route('kunjungan.index') }}'" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-blue-600/30 transition">
             + Jadwalkan Kunjungan
         </button>
     </div>

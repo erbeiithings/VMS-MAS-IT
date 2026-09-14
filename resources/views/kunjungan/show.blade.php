@@ -12,6 +12,12 @@
             <span>{{ session('success') }}</span>
         </div>
     @endif
+    @if(session('error'))
+        <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
+            <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            <span>{{ session('error') }}</span>
+        </div>
+    @endif
 
     <!-- Header Summary Card -->
     <div class="p-5 md:p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-[#0a1533] to-[#040817] border border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -55,7 +61,7 @@
         </div>
     </div>
 
-    <!-- SECTION 1: Check-in GPS & Tombol Tolak Jadwal (Hanya muncul jika status Terjadwal & user adalah Engineer) -->
+    <!-- SECTION 1: Check-in GPS & Tombol Tolak Jadwal -->
     @if(Auth::user()->id_role == 3 && $kunjungan->status == 'Terjadwal')
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Kotak Check-In -->
@@ -65,14 +71,14 @@
                 
                 <form id="formCheckIn" action="{{ route('kunjungan.checkin', $kunjungan->id_kunjungan) }}" method="POST">
                     @csrf
-                    <input type="hidden" name="lokasi_gps" id="lokasi_gps">
-                    <button type="button" onclick="getGPSLocation()" class="w-full px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/40 transition">
+                    <input type="hidden" name="lokasi_gps" id="lokasi_gps_checkin">
+                    <button type="button" onclick="getGPSCheckIn()" class="w-full px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/40 transition">
                         📍 Ambil Lokasi GPS & Check-In
                     </button>
                 </form>
             </div>
 
-            <!-- Kotak Tolak / Reschedule Jadwal (Insight Mentor) -->
+            <!-- Kotak Tolak / Reschedule Jadwal -->
             <div class="p-6 rounded-2xl bg-gradient-to-r from-rose-950/40 to-slate-900 border border-rose-500/30 space-y-3">
                 <h4 class="text-sm font-bold text-white">Jadwal Bentrok / Berhalangan?</h4>
                 <p class="text-xs text-slate-400">Tolak jadwal ini dan berikan alasan agar Pimpinan bisa melakukan penjadwalan ulang.</p>
@@ -88,7 +94,7 @@
         </div>
     @endif
 
-    <!-- Jika statusnya sudah Reschedule, tampilkan pesannya ke semua orang -->
+    <!-- Jika statusnya sudah Reschedule -->
     @if($kunjungan->status == 'Reschedule')
         <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex flex-col gap-1">
             <span class="font-bold">⚠️ Status: Jadwal Perlu Dijadwalkan Ulang (Reschedule)</span>
@@ -176,7 +182,6 @@
             
             <form id="formCheckOut" action="{{ route('kunjungan.checkout', $kunjungan->id_kunjungan) }}" method="POST" class="space-y-3 text-xs">
                 @csrf
-                <!-- Input hidden untuk nyimpen koordinat GPS saat Check-out -->
                 <input type="hidden" name="lokasi_gps" id="lokasi_gps_checkout"> 
                 
                 <div>
@@ -184,8 +189,7 @@
                     <textarea name="catatan" id="catatan_pekerjaan" rows="4" required placeholder="Contoh: Pemeliharaan berkala server dan perapihan cabling rack selesai 100%." class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
                 </div>
                 
-                <!-- Tombolnya diubah panggil fungsi JS getGPSCheckout() -->
-                <button type="button" onclick="getGPSCheckout()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30 transition">
+                <button type="button" onclick="getGPSCheckOut()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30 transition">
                     📍 Ambil GPS Check-Out & Buat Laporan
                 </button>
             </form>
@@ -243,7 +247,14 @@
             <div class="space-y-1.5 text-slate-400">
                 <p><strong class="text-white">Customer:</strong> {{ $kunjungan->customer->nama_perusahaan ?? '-' }}</p>
                 <p><strong class="text-white">PIC:</strong> {{ $kunjungan->customer->pic ?? '-' }} ({{ $kunjungan->customer->telepon ?? '-' }})</p>
-                <p><strong class="text-white">Engineer Bertugas:</strong> {{ $kunjungan->engineer->user->nama ?? 'Belum Ditugaskan' }}</p>
+                <p><strong class="text-white">Lead Engineer:</strong> {{ $kunjungan->engineer->user->nama ?? 'Belum Ditugaskan' }}</p>
+                <p><strong class="text-white">Tim Support:</strong> 
+                    @if($kunjungan->supportEngineers->count() > 0)
+                        {{ $kunjungan->supportEngineers->pluck('user.nama')->implode(', ') }}
+                    @else
+                        <span class="italic text-slate-500">Tidak ada tim support</span>
+                    @endif
+                </p>
                 <p><strong class="text-white">Alat Kerja Terbawa:</strong></p>
                 <ul class="list-disc list-inside text-slate-300 pl-2">
                     @forelse($kunjungan->tools as $tool)
@@ -268,7 +279,7 @@
         </div>
     </div>
 
-    <!-- TAMPILAN BARU: Tabel Rincian Pengeluaran -->
+    <!-- Tabel Rincian Pengeluaran -->
     <div class="p-5 md:p-6 rounded-2xl bg-white/[0.03] border border-slate-800/80">
         <h4 class="text-sm font-semibold text-slate-200 mb-4">Rincian Pengeluaran Operasional</h4>
         <div class="overflow-x-auto">
@@ -336,13 +347,75 @@
 
 </div>
 
+<!-- ========================================== -->
+<!-- MODAL INFO KHUSUS ALERT (ERROR / WARNING)  -->
+<!-- ========================================== -->
+<div id="modalInfoGPS" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+    <div class="bg-[#0b132b] border border-slate-700/80 rounded-2xl w-full max-w-xs p-6 shadow-2xl text-center transition-all">
+        <div id="modalInfoIcon" class="mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-4">
+            <!-- Ikon akan disuntik dari JS -->
+        </div>
+        <h3 id="modalInfoTitle" class="text-base font-bold text-white mb-2"></h3>
+        <p id="modalInfoMessage" class="text-xs text-slate-300 mb-6 leading-relaxed"></p>
+        <button type="button" onclick="document.getElementById('modalInfoGPS').classList.add('hidden')" class="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-xs transition">
+            Tutup
+        </button>
+    </div>
+</div>
+<!-- ========================================== -->
+
 <!-- Script Signature Pad & GPS -->
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 <script>
-    function getGPSLocation() {
+    // Fungsi untuk menampilkan Custom Modal (Pengganti alert bawaan)
+    function showGPSModal(title, message, isSuccess) {
+        document.getElementById('modalInfoTitle').innerText = title;
+        document.getElementById('modalInfoMessage').innerText = message;
+        
+        const iconContainer = document.getElementById('modalInfoIcon');
+        if(isSuccess) {
+            iconContainer.className = 'mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-4 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+            iconContainer.innerHTML = '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+        } else {
+            iconContainer.className = 'mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-4 bg-rose-500/20 text-rose-400 border border-rose-500/30';
+            iconContainer.innerHTML = '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
+        }
+        
+        document.getElementById('modalInfoGPS').classList.remove('hidden');
+    }
+
+    // ==========================================
+    // FUNGSI Check-In
+    // ==========================================
+    function getGPSCheckIn() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const coords = `${position.coords.latitude}, ${position.coords.longitude}`;
+                    document.getElementById('lokasi_gps_checkin').value = coords;
+                    showConfirmModal(
+                        document.getElementById('formCheckIn'),
+                        'Konfirmasi Check-In',
+                        `Koordinat Anda: ${coords}. Apakah Anda yakin ingin melakukan Check-In sekarang?`
+                    );
+                },
+                (error) => {
+                    showGPSModal('Gagal Membaca GPS', 'Pastikan GPS aktif dan izin lokasi (Location) di browser HP Anda telah diizinkan.', false);
+                },
+                { enableHighAccuracy: true }
+            );
+        } else {
+            showGPSModal('Tidak Mendukung', 'Perangkat Anda tidak mendukung fitur geolokasi.', false);
+        }
+    }
+
+    // ==========================================
+    // FUNGSI Check-Out
+    // ==========================================
+    function getGPSCheckOut() {
         const catatan = document.getElementById('catatan_pekerjaan').value;
         if (!catatan.trim()) {
-            alert('Harap isi deskripsi hasil pekerjaan terlebih dahulu!');
+            showGPSModal('Deskripsi Kosong', 'Harap isi deskripsi hasil pekerjaan terlebih dahulu sebelum melakukan Check-Out!', false);
             return;
         }
 
@@ -358,15 +431,18 @@
                     );
                 },
                 (error) => {
-                    alert('Gagal mengambil lokasi GPS. Pastikan izin lokasi di browser HP Anda telah diizinkan.');
+                    showGPSModal('Gagal Membaca GPS', 'Pastikan GPS aktif dan izin lokasi di browser HP Anda telah diizinkan.', false);
                 },
                 { enableHighAccuracy: true }
             );
         } else {
-            alert('Perangkat Anda tidak mendukung geolokasi.');
+            showGPSModal('Tidak Mendukung', 'Perangkat Anda tidak mendukung fitur geolokasi.', false);
         }
     }
 
+    // ==========================================
+    // FUNGSI SIGNATURE PAD
+    // ==========================================
     let signaturePad;
     document.addEventListener('DOMContentLoaded', () => {
         const canvas = document.getElementById('signaturePad');
@@ -394,7 +470,7 @@
 
     function submitSignature() {
         if (signaturePad && signaturePad.isEmpty()) {
-            alert('Customer belum membubuhkan tanda tangan.');
+            showGPSModal('Tanda Tangan Kosong', 'Customer belum membubuhkan tanda tangan. Silakan isi terlebih dahulu pada kotak putih.', false);
             return;
         }
         document.getElementById('signatureInput').value = signaturePad.toDataURL();

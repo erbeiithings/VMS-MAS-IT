@@ -54,6 +54,10 @@ Route::middleware(['auth'])->prefix('kunjungan')->name('kunjungan.')->group(func
     // Role Pimpinan
     Route::middleware(['role:Pimpinan'])->group(function () {
         Route::post('/store', [KunjunganController::class, 'store'])->name('store');
+        
+        // TAMBAHAN BARU: Route untuk Edit & Hapus Kunjungan
+        Route::put('/{id}', [KunjunganController::class, 'update'])->name('update');
+        Route::delete('/{id}', [KunjunganController::class, 'destroy'])->name('destroy');
     });
 
     // Role Engineer

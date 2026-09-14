@@ -21,6 +21,8 @@ class CustomerController extends Controller
             'pic' => 'required|string|max:100',
             'telepon' => 'required|string|max:20',
             'email' => 'required|email|max:100',
+            'latitude' => 'nullable|string',   // TAMBAHAN: Validasi Latitude
+            'longitude' => 'nullable|string',  // TAMBAHAN: Validasi Longitude
         ]);
 
         Customer::create($validated);
@@ -38,6 +40,8 @@ class CustomerController extends Controller
             'pic' => 'required|string|max:100',
             'telepon' => 'required|string|max:20',
             'email' => 'required|email|max:100',
+            'latitude' => 'nullable|string',   // TAMBAHAN: Validasi Latitude
+            'longitude' => 'nullable|string',  // TAMBAHAN: Validasi Longitude
         ]);
 
         $customer->update($validated);

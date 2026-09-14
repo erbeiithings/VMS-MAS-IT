@@ -47,4 +47,11 @@ class Kunjungan extends Model
     {
         return $this->hasMany(Pengeluaran::class, 'id_kunjungan', 'id_kunjungan');
     }
+
+    // TAMBAHAN BARU: Relasi ke tabel Support Engineer (Maksimal 4 orang)
+    public function supportEngineers()
+    {
+        return $this->belongsToMany(Engineer::class, 'kunjungan_support', 'id_kunjungan', 'id_engineer')
+                    ->withTimestamps();
+    }
 }

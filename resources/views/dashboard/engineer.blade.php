@@ -6,6 +6,29 @@
 @section('content')
 <div class="space-y-6">
 
+    <!-- ======================================================= -->
+    <!-- D-DAY ALERT BANNER (Hanya muncul kalau ada jadwal hari ini) -->
+    <!-- ======================================================= -->
+    @if($alertHariIni->count() > 0)
+        <div class="p-4 rounded-2xl bg-rose-600 border-2 border-rose-400 shadow-[0_0_20px_rgba(225,29,72,0.4)] flex flex-col sm:flex-row items-center justify-between gap-4 animate-pulse-slow">
+            <div class="flex items-center gap-3 text-white">
+                <div class="p-2 bg-white/20 rounded-full shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                </div>
+                <div>
+                    <h3 class="font-bold text-sm md:text-base uppercase tracking-wider">PENGINGAT HARI H!</h3>
+                    <p class="text-xs md:text-sm text-rose-100">Anda memiliki <strong>{{ $alertHariIni->count() }} jadwal kunjungan</strong> yang harus dilaksanakan hari ini.</p>
+                </div>
+            </div>
+        </div>
+        
+        <style>
+            .animate-pulse-slow { animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+            @keyframes pulse-slow { 0%, 100% { opacity: 1; } 50% { opacity: 0.9; } }
+        </style>
+    @endif
+    <!-- ======================================================= -->
+
     <!-- Status Engineer Profile -->
     <div class="p-5 md:p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-[#0a1533] to-[#040817] border border-slate-800 flex items-center justify-between">
         <div>
@@ -33,6 +56,11 @@
                         <h5 class="text-base font-bold text-white mt-1">{{ $kunjunganAktif->pekerjaan }}</h5>
                         <p class="text-xs text-slate-300 font-medium">{{ $kunjunganAktif->customer->nama_perusahaan ?? '-' }}</p>
                         <p class="text-xs text-slate-400 mt-0.5">{{ $kunjunganAktif->lokasi }}</p>
+                        
+                        <!-- Info Peran (Lead / Support) -->
+                        <p class="text-[10px] mt-2 inline-block px-2 py-1 rounded-md bg-slate-800 border border-slate-700 text-slate-300">
+                            Peran Anda: <strong class="text-blue-400">{{ $kunjunganAktif->id_engineer == $engineer->id_engineer ? 'Lead Engineer' : 'Tim Support' }}</strong>
+                        </p>
                     </div>
                     <span class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
                         {{ $kunjunganAktif->status }}

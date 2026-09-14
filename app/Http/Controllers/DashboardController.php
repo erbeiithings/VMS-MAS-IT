@@ -68,23 +68,49 @@ class DashboardController extends Controller
 
         $kunjunganAktif = null;
         $riwayatKunjungan = collect();
+        $alertHariIni = collect(); // Variabel penampung tugas hari H
 
         if ($engineer) {
-            // Kunjungan yang sedang dikerjakan atau terjadwal untuk engineer ini
+            $engineerId = $engineer->id_engineer;
+
+            // 1. Kunjungan Aktif (Sebagai Lead ATAU Support)
             $kunjunganAktif = Kunjungan::with(['customer', 'tools'])
-                ->where('id_engineer', $engineer->id_engineer)
                 ->whereIn('status', ['Terjadwal', 'Dikerjakan'])
+                ->where(function($q) use ($engineerId) {
+                    $q->where('id_engineer', $engineerId)
+                      ->orWhereHas('supportEngineers', function($sq) use ($engineerId) {
+                          $sq->where('engineers.id_engineer', $engineerId);
+                      });
+                })
                 ->latest()
                 ->first();
 
+            // 2. Riwayat Kunjungan Selesai (Sebagai Lead ATAU Support)
             $riwayatKunjungan = Kunjungan::with('customer')
-                ->where('id_engineer', $engineer->id_engineer)
                 ->where('status', 'Selesai')
+                ->where(function($q) use ($engineerId) {
+                    $q->where('id_engineer', $engineerId)
+                      ->orWhereHas('supportEngineers', function($sq) use ($engineerId) {
+                          $sq->where('engineers.id_engineer', $engineerId);
+                      });
+                })
                 ->latest()
                 ->take(5)
                 ->get();
+
+            // 3. LOGIC D-DAY ALERT: Cari jadwal yang tanggalnya HARI INI
+            $alertHariIni = Kunjungan::with('customer')
+                ->whereDate('tanggal', now()->toDateString())
+                ->where('status', 'Terjadwal')
+                ->where(function($q) use ($engineerId) {
+                    $q->where('id_engineer', $engineerId)
+                      ->orWhereHas('supportEngineers', function($sq) use ($engineerId) {
+                          $sq->where('engineers.id_engineer', $engineerId);
+                      });
+                })
+                ->get();
         }
 
-        return view('dashboard.engineer', compact('engineer', 'kunjunganAktif', 'riwayatKunjungan'));
+        return view('dashboard.engineer', compact('engineer', 'kunjunganAktif', 'riwayatKunjungan', 'alertHariIni'));
     }
 }
