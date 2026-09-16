@@ -6,7 +6,7 @@
     <style>
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            color: #1a202c;
+            color: #1e293b;
             font-size: 11px;
             line-height: 1.4;
             margin: 0;
@@ -14,14 +14,14 @@
         }
         .header-table {
             width: 100%;
-            border-bottom: 2px solid #0f172a;
+            border-bottom: 2px solid #002266; /* Diubah ke warna Corporate Blue */
             padding-bottom: 12px;
             margin-bottom: 15px;
         }
         .title {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
-            color: #0f172a;
+            color: #002266; /* Diubah ke warna Corporate Blue */
             text-transform: uppercase;
         }
         .subtitle {
@@ -35,9 +35,11 @@
             margin: 15px 0 10px 0;
             text-transform: uppercase;
             letter-spacing: 1px;
-            background-color: #f1f5f9;
+            background-color: #f0f4ff; /* Background biru sangat muda */
+            color: #002266;
             padding: 6px;
             border-radius: 4px;
+            border: 1px solid #bfdbfe;
         }
         .info-table {
             width: 100%;
@@ -59,7 +61,7 @@
             text-align: left;
         }
         .data-table th {
-            background-color: #0f172a;
+            background-color: #002266; /* Header tabel jadi Corporate Blue */
             color: #ffffff;
             font-weight: bold;
             font-size: 10px;
@@ -94,14 +96,20 @@
     <!-- Header Dokumen -->
     <table class="header-table">
         <tr>
-            <td style="width: 60%;">
+            <!-- INI BAGIAN LOGONYA -->
+            <td style="width: 15%; text-align: left; vertical-align: middle;">
+                <img src="{{ public_path('images/logo-masit.png') }}" alt="Logo MAS-IT" style="max-height: 55px; object-fit: contain;">
+            </td>
+            <!-- INFORMASI PERUSAHAAN -->
+            <td style="width: 45%; vertical-align: middle;">
                 <div class="title">PT MAS-IT SOLUSI INTEGRASI</div>
                 <div class="subtitle">IT Infrastructure, Networking & Security Management Solutions</div>
                 <div class="subtitle">Website: mas-it.id | Email: support@mas-it.id</div>
             </td>
-            <td style="width: 40%; text-align: right;">
-                <div style="font-size: 12px; font-weight: bold; color: #0284c7;">BUKTI PENYELESAIAN PEKERJAAN</div>
-                <div style="font-size: 10px; font-family: monospace;">No: {{ $kunjungan->nomor }}</div>
+            <!-- DETAIL DOKUMEN -->
+            <td style="width: 40%; text-align: right; vertical-align: middle;">
+                <div style="font-size: 12px; font-weight: bold; color: #003399;">BUKTI PENYELESAIAN PEKERJAAN</div>
+                <div style="font-size: 10px; font-family: monospace; color: #334155;">No: {{ $kunjungan->nomor }}</div>
                 <div style="font-size: 9px; color: #64748b;">Tanggal Cetak: {{ date('d/m/Y H:i') }}</div>
             </td>
         </tr>
@@ -112,25 +120,25 @@
     <!-- Informasi Kunjungan & Customer -->
     <table class="info-table">
         <tr>
-            <td style="width: 20%; font-weight: bold;">Perusahaan (Customer)</td>
+            <td style="width: 20%; font-weight: bold; color: #002266;">Perusahaan (Klien)</td>
             <td style="width: 30%;">: {{ $kunjungan->customer->nama_perusahaan ?? '-' }}</td>
-            <td style="width: 20%; font-weight: bold;">Engineer Bertugas</td>
+            <td style="width: 20%; font-weight: bold; color: #002266;">Engineer Bertugas</td>
             <td style="width: 30%;">: {{ $kunjungan->engineer->user->nama ?? '-' }}</td>
         </tr>
         <tr>
-            <td style="font-weight: bold;">Person In Charge (PIC)</td>
+            <td style="font-weight: bold; color: #002266;">Person In Charge (PIC)</td>
             <td>: {{ $kunjungan->customer->pic ?? '-' }} ({{ $kunjungan->customer->telepon ?? '-' }})</td>
-            <td style="font-weight: bold;">Kontak Engineer</td>
+            <td style="font-weight: bold; color: #002266;">Kontak Engineer</td>
             <td>: {{ $kunjungan->engineer->kontak ?? '-' }}</td>
         </tr>
         <tr>
-            <td style="font-weight: bold;">Tanggal & Waktu Jadwal</td>
+            <td style="font-weight: bold; color: #002266;">Jadwal Pelaksanaan</td>
             <td>: {{ $kunjungan->tanggal }} ({{ $kunjungan->waktu }})</td>
-            <td style="font-weight: bold;">Status Pekerjaan</td>
+            <td style="font-weight: bold; color: #002266;">Status Pekerjaan</td>
             <td>: <strong>{{ strtoupper($kunjungan->status) }}</strong></td>
         </tr>
         <tr>
-            <td style="font-weight: bold;">Lokasi Pekerjaan</td>
+            <td style="font-weight: bold; color: #002266;">Lokasi Pekerjaan</td>
             <td colspan="3">: {{ $kunjungan->lokasi }}</td>
         </tr>
     </table>
@@ -147,11 +155,11 @@
         </thead>
         <tbody>
             <tr>
-                <td style="font-weight: bold;">{{ $kunjungan->pekerjaan }}</td>
+                <td style="font-weight: bold; color: #002266;">{{ $kunjungan->pekerjaan }}</td>
                 <td>{{ $aktivitas->catatan ?? 'Pekerjaan telah diselesaikan sesuai dengan instruksi kerja.' }}</td>
                 <td>
                     {{ $aktivitas->waktu_mulai ? date('d/m/Y H:i', strtotime($aktivitas->waktu_mulai)) : '-' }}<br>
-                    <small style="color: #64748b; font-size: 8px;">GPS: {{ $aktivitas->lokasi ?? '-' }}</small>
+                    <small style="color: #003399; font-size: 8px;">GPS: {{ $aktivitas->lokasi ?? '-' }}</small>
                 </td>
                 <td>
                     {{ $aktivitas->waktu_selesai ? date('d/m/Y H:i', strtotime($aktivitas->waktu_selesai)) : '-' }}
@@ -161,11 +169,11 @@
     </table>
 
     <!-- Tools / Alat Kerja yang Digunakan -->
-    <div style="font-weight: bold; margin-bottom: 5px; font-size: 10px;">DAFTAR ALAT / TOOLS YANG DIGUNAKAN:</div>
+    <div style="font-weight: bold; margin-bottom: 5px; font-size: 10px; color: #002266;">DAFTAR ALAT / TOOLS YANG DIGUNAKAN:</div>
     <table class="data-table">
         <thead>
             <tr>
-                <th style="width: 5%;">No</th>
+                <th style="width: 5%; text-align: center;">No</th>
                 <th style="width: 25%;">Kode Alat</th>
                 <th style="width: 40%;">Nama Alat</th>
                 <th style="width: 15%;">Kategori</th>
@@ -176,14 +184,14 @@
             @forelse($kunjungan->tools as $index => $tool)
                 <tr>
                     <td style="text-align: center;">{{ $index + 1 }}</td>
-                    <td style="font-family: monospace;">{{ $tool->kode }}</td>
+                    <td style="font-family: monospace; font-weight: bold; color: #003399;">{{ $tool->kode }}</td>
                     <td>{{ $tool->nama_alat }}</td>
                     <td>{{ $tool->kategori }}</td>
                     <td>{{ $tool->kondisi }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" style="text-align: center; color: #64748b; font-style: italic;">Tidak ada alat terdaftar.</td>
+                    <td colspan="5" style="text-align: center; color: #64748b; font-style: italic;">Tidak ada alat tambahan yang terdaftar.</td>
                 </tr>
             @endforelse
         </tbody>
@@ -193,16 +201,16 @@
     <table class="signature-table">
         <tr>
             <td class="signature-box">
-                <div>Dikerjakan Oleh,</div>
-                <div style="font-weight: bold; margin-bottom: 45px;">Engineer MAS-IT</div>
-                <div style="border-top: 1px solid #334155; display: inline-block; width: 80%; padding-top: 3px; font-weight: bold;">
+                <div style="color: #475569;">Dikerjakan Oleh,</div>
+                <div style="font-weight: bold; color: #002266; margin-bottom: 45px;">Engineer MAS-IT</div>
+                <div style="border-top: 1px solid #002266; display: inline-block; width: 80%; padding-top: 3px; font-weight: bold; color: #1e293b;">
                     {{ $kunjungan->engineer->user->nama ?? 'Engineer' }}
                 </div>
             </td>
             <td style="width: 10%;"></td>
             <td class="signature-box">
-                <div>Disetujui & Diverifikasi Oleh,</div>
-                <div style="font-weight: bold; margin-bottom: 5px;">Customer / Klien</div>
+                <div style="color: #475569;">Disetujui & Diverifikasi Oleh,</div>
+                <div style="font-weight: bold; color: #002266; margin-bottom: 5px;">Customer / Klien</div>
                 @if($bukti && $bukti->tanda_tangan_customer)
                     <div>
                         <img src="{{ $bukti->tanda_tangan_customer }}" class="sign-img" alt="Digital Signature">
@@ -210,7 +218,7 @@
                 @else
                     <div style="height: 55px;"></div>
                 @endif
-                <div style="border-top: 1px solid #334155; display: inline-block; width: 80%; padding-top: 3px; font-weight: bold;">
+                <div style="border-top: 1px solid #002266; display: inline-block; width: 80%; padding-top: 3px; font-weight: bold; color: #1e293b;">
                     {{ $kunjungan->customer->pic ?? 'Customer PIC' }}
                 </div>
             </td>
@@ -218,7 +226,7 @@
     </table>
 
     <div class="footer-note">
-        Dokumen ini dibuat dan diverifikasi secara digital melalui Sistem Manajemen Kunjungan MAS-IT VMS.<br>
+        Dokumen ini dibuat dan diverifikasi secara digital melalui Sistem Manajemen Kunjungan PT MAS-IT Solusi Integrasi.<br>
         Segala bentuk perubahan data setelah tanda tangan terverifikasi dianggap tidak sah.
     </div>
 

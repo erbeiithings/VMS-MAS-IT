@@ -115,4 +115,34 @@ class LaporanController extends Controller
 
         return back()->with('success', 'Berhasil! Email Berita Acara beserta PDF terkirim ke: ' . $emailTujuan);
     }
+
+    // =====================================================================
+    // FUNGSI BARU: Engineer Submit Revisi Laporan
+    // =====================================================================
+    public function submitRevisi(Request $request, $id_laporan)
+    {
+        // Validasi input
+        $request->validate([
+            'catatan_revisi' => 'required|string'
+        ]);
+
+        $laporan = Laporan::with('kunjungan.aktivitas')->findOrFail($id_laporan);
+
+        // 1. Update catatan/deskripsi pada aktivitas kunjungan terakhir
+        $aktivitas = $laporan->kunjungan->aktivitas->last();
+        if ($aktivitas) {
+            $aktivitas->catatan = $request->catatan_revisi;
+            $aktivitas->save();
+        }
+
+        // 2. Ubah status laporan kembali menjadi Menunggu Persetujuan
+        $laporan->status_approval = 'Menunggu Persetujuan';
+        
+        // 3. Kosongkan kembali catatan dari atasan karena sudah direvisi
+        $laporan->catatan_approval = null; 
+        
+        $laporan->save();
+
+        return back()->with('success', 'Laporan berhasil diperbaiki dan diajukan ulang ke Atasan!');
+    }
 }

@@ -80,15 +80,19 @@ Route::middleware(['auth'])->prefix('kunjungan')->name('kunjungan.')->group(func
 Route::middleware(['auth'])->prefix('laporan')->name('laporan.')->group(function () {
     Route::get('/', [LaporanController::class, 'index'])->name('index');
     Route::get('/{id}/pdf', [LaporanController::class, 'downloadPdf'])->name('pdf');
-    Route::post('/{id}/approve', [LaporanController::class, 'updateApproval'])->name('approve');
-});
-
-// Rute Laporan, Cetak PDF, dan Approval (Akses semua pengguna terautentikasi)
-Route::middleware(['auth'])->prefix('laporan')->name('laporan.')->group(function () {
-    Route::get('/', [LaporanController::class, 'index'])->name('index');
-    Route::get('/{id}/pdf', [LaporanController::class, 'downloadPdf'])->name('pdf');
+    
+    // Approval Atasan
     Route::post('/{id}/approve', [LaporanController::class, 'updateApproval'])->name('approve');
     
-    // TAMBAHAN BARU: Route untuk kirim email
+    // Kirim Email Customer
     Route::post('/{id}/email', [LaporanController::class, 'sendEmail'])->name('email');
+
+    // TAMBAHAN BARU: Route untuk Engineer submit revisi laporan
+    Route::post('/{id}/revisi', [LaporanController::class, 'submitRevisi'])->name('revisi');
+});
+
+// Rute Profil (Akses semua pengguna login)
+Route::middleware(['auth'])->prefix('profile')->name('profile.')->group(function () {
+    Route::get('/', [App\Http\Controllers\ProfileController::class, 'index'])->name('index');
+    Route::put('/update', [App\Http\Controllers\ProfileController::class, 'update'])->name('update');
 });

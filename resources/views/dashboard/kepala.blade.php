@@ -8,25 +8,25 @@
 
     <!-- KPI Metric Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-        <div class="p-5 rounded-2xl bg-white/[0.03] border border-slate-800/80 backdrop-blur-sm">
-            <p class="text-xs font-medium text-slate-400">Total Kunjungan</p>
-            <h3 class="text-2xl font-bold text-white mt-1">{{ $totalKunjungan }}</h3>
-            <p class="text-[11px] text-blue-400 mt-2">Semua status alur kerja</p>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <p class="text-xs font-semibold text-slate-500">Total Kunjungan</p>
+            <h3 class="text-2xl font-bold text-[#002266] mt-1">{{ $totalKunjungan }}</h3>
+            <p class="text-[11px] text-[#0044cc] font-medium mt-2">Semua status alur kerja</p>
         </div>
-        <div class="p-5 rounded-2xl bg-white/[0.03] border border-slate-800/80 backdrop-blur-sm">
-            <p class="text-xs font-medium text-slate-400">Total Customer</p>
-            <h3 class="text-2xl font-bold text-white mt-1">{{ $totalCustomer }}</h3>
-            <p class="text-[11px] text-emerald-400 mt-2">Klien terdaftar</p>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <p class="text-xs font-semibold text-slate-500">Total Customer</p>
+            <h3 class="text-2xl font-bold text-[#002266] mt-1">{{ $totalCustomer }}</h3>
+            <p class="text-[11px] text-emerald-600 font-medium mt-2">Klien terdaftar</p>
         </div>
-        <div class="p-5 rounded-2xl bg-white/[0.03] border border-slate-800/80 backdrop-blur-sm">
-            <p class="text-xs font-medium text-slate-400">Engineer Aktif</p>
-            <h3 class="text-2xl font-bold text-white mt-1">{{ $totalEngineer }}</h3>
-            <p class="text-[11px] text-indigo-400 mt-2">Tim teknis lapangan</p>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <p class="text-xs font-semibold text-slate-500">Engineer Aktif</p>
+            <h3 class="text-2xl font-bold text-[#002266] mt-1">{{ $totalEngineer }}</h3>
+            <p class="text-[11px] text-indigo-600 font-medium mt-2">Tim teknis lapangan</p>
         </div>
-        <div class="p-5 rounded-2xl bg-white/[0.03] border border-slate-800/80 backdrop-blur-sm">
-            <p class="text-xs font-medium text-slate-400">Total Tools / Alat</p>
-            <h3 class="text-2xl font-bold text-white mt-1">{{ $totalTool }}</h3>
-            <p class="text-[11px] text-amber-400 mt-2">Aset operasional</p>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <p class="text-xs font-semibold text-slate-500">Total Tools / Alat</p>
+            <h3 class="text-2xl font-bold text-[#002266] mt-1">{{ $totalTool }}</h3>
+            <p class="text-[11px] text-amber-600 font-medium mt-2">Aset operasional</p>
         </div>
     </div>
 
@@ -34,80 +34,80 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Status Kunjungan Donut Chart -->
-        <div class="p-6 rounded-2xl bg-white/[0.03] border border-slate-800/80">
-            <h4 class="text-sm font-semibold text-slate-200 mb-4">Distribusi Status Kunjungan</h4>
+        <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <h4 class="text-sm font-bold text-[#002266] mb-4">Distribusi Status Kunjungan</h4>
             <div class="h-56 relative flex items-center justify-center">
                 <canvas id="statusChart"></canvas>
             </div>
             <div class="grid grid-cols-3 gap-2 mt-4 text-center text-xs">
-                <div class="p-2 bg-slate-900/50 rounded-lg">
-                    <p class="text-amber-400 font-bold">{{ $kunjunganTerjadwal }}</p>
-                    <p class="text-[10px] text-slate-400">Terjadwal</p>
+                <div class="p-2 bg-slate-50 border border-slate-100 rounded-lg">
+                    <p class="text-amber-500 font-bold">{{ $kunjunganTerjadwal }}</p>
+                    <p class="text-[10px] text-slate-500 font-medium">Terjadwal</p>
                 </div>
-                <div class="p-2 bg-slate-900/50 rounded-lg">
-                    <p class="text-blue-400 font-bold">{{ $kunjunganDikerjakan }}</p>
-                    <p class="text-[10px] text-slate-400">Dikerjakan</p>
+                <div class="p-2 bg-slate-50 border border-slate-100 rounded-lg">
+                    <p class="text-[#0044cc] font-bold">{{ $kunjunganDikerjakan }}</p>
+                    <p class="text-[10px] text-slate-500 font-medium">Dikerjakan</p>
                 </div>
-                <div class="p-2 bg-slate-900/50 rounded-lg">
-                    <p class="text-emerald-400 font-bold">{{ $kunjunganSelesai }}</p>
-                    <p class="text-[10px] text-slate-400">Selesai</p>
+                <div class="p-2 bg-slate-50 border border-slate-100 rounded-lg">
+                    <p class="text-emerald-500 font-bold">{{ $kunjunganSelesai }}</p>
+                    <p class="text-[10px] text-slate-500 font-medium">Selesai</p>
                 </div>
             </div>
         </div>
 
         <!-- Analisis Jenis Pekerjaan Terbanyak -->
-        <div class="lg:col-span-2 p-6 rounded-2xl bg-white/[0.03] border border-slate-800/80">
-            <h4 class="text-sm font-semibold text-slate-200 mb-4">Jenis Pekerjaan Terbanyak</h4>
+        <div class="lg:col-span-2 p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <h4 class="text-sm font-bold text-[#002266] mb-4">Jenis Pekerjaan Terbanyak</h4>
             <div class="space-y-4">
                 @forelse($pekerjaanTerbanyak as $item)
                     <div>
-                        <div class="flex justify-between text-xs font-medium text-slate-300 mb-1">
+                        <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
                             <span>{{ $item->pekerjaan }}</span>
-                            <span class="text-blue-400">{{ $item->total }} Kunjungan</span>
+                            <span class="text-[#003399]">{{ $item->total }} Kunjungan</span>
                         </div>
-                        <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                            <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-500 rounded-full" style="width: {{ ($item->total / max($totalKunjungan, 1)) * 100 }}%"></div>
+                        <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-[#002266] to-[#0044cc] rounded-full" style="width: {{ ($item->total / max($totalKunjungan, 1)) * 100 }}%"></div>
                         </div>
                     </div>
                 @empty
-                    <p class="text-xs text-slate-500 italic">Belum ada data kunjungan.</p>
+                    <p class="text-xs text-slate-400 italic">Belum ada data kunjungan.</p>
                 @endforelse
             </div>
         </div>
     </div>
 
     <!-- Recent Kunjungan Table -->
-    <div class="p-6 rounded-2xl bg-white/[0.03] border border-slate-800/80">
-        <h4 class="text-sm font-semibold text-slate-200 mb-4">Monitoring Kunjungan Terbaru</h4>
+    <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <h4 class="text-sm font-bold text-[#002266] mb-4">Monitoring Kunjungan Terbaru</h4>
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-300">
-                <thead class="text-[11px] uppercase bg-slate-900/80 text-slate-400">
+            <table class="w-full text-left text-xs text-slate-600">
+                <thead class="text-[11px] uppercase bg-slate-50 text-slate-500 border-b border-slate-200">
                     <tr>
-                        <th class="p-3">Nomor</th>
-                        <th class="p-3">Customer</th>
-                        <th class="p-3">Engineer</th>
-                        <th class="p-3">Pekerjaan</th>
-                        <th class="p-3">Tanggal & Waktu</th>
-                        <th class="p-3">Status</th>
+                        <th class="p-3 font-bold">Nomor</th>
+                        <th class="p-3 font-bold">Customer</th>
+                        <th class="p-3 font-bold">Engineer</th>
+                        <th class="p-3 font-bold">Pekerjaan</th>
+                        <th class="p-3 font-bold">Tanggal & Waktu</th>
+                        <th class="p-3 font-bold">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-800/60">
+                <tbody class="divide-y divide-slate-100">
                     @forelse($recentKunjungan as $kunjungan)
-                        <tr class="hover:bg-slate-800/20">
-                            <td class="p-3 font-semibold text-blue-400">{{ $kunjungan->nomor }}</td>
-                            <td class="p-3">{{ $kunjungan->customer->nama_perusahaan ?? '-' }}</td>
-                            <td class="p-3">{{ $kunjungan->engineer->user->nama ?? 'Belum Ditugaskan' }}</td>
-                            <td class="p-3">{{ $kunjungan->pekerjaan }}</td>
-                            <td class="p-3 text-slate-400">{{ $kunjungan->tanggal }} ({{ $kunjungan->waktu }})</td>
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="p-3 font-bold text-[#003399]">{{ $kunjungan->nomor }}</td>
+                            <td class="p-3 font-medium text-slate-800">{{ $kunjungan->customer->nama_perusahaan ?? '-' }}</td>
+                            <td class="p-3 font-medium">{{ $kunjungan->engineer->user->nama ?? 'Belum Ditugaskan' }}</td>
+                            <td class="p-3 font-medium">{{ $kunjungan->pekerjaan }}</td>
+                            <td class="p-3 text-slate-500">{{ $kunjungan->tanggal }} ({{ $kunjungan->waktu }})</td>
                             <td class="p-3">
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-medium {{ $kunjungan->status == 'Selesai' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : ($kunjungan->status == 'Dikerjakan' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20') }}">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold {{ $kunjungan->status == 'Selesai' ? 'bg-emerald-100 text-emerald-700' : ($kunjungan->status == 'Dikerjakan' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700') }}">
                                     {{ $kunjungan->status }}
                                 </span>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="p-4 text-center text-slate-500 italic">Belum ada kunjungan terbaru.</td>
+                            <td colspan="6" class="p-4 text-center text-slate-400 italic">Belum ada kunjungan terbaru.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -126,7 +126,7 @@
                 labels: ['Terjadwal', 'Dikerjakan', 'Selesai'],
                 datasets: [{
                     data: [{{ $kunjunganTerjadwal }}, {{ $kunjunganDikerjakan }}, {{ $kunjunganSelesai }}],
-                    backgroundColor: ['#f59e0b', '#3b82f6', '#10b981'],
+                    backgroundColor: ['#f59e0b', '#0044cc', '#10b981'],
                     borderWidth: 0
                 }]
             },

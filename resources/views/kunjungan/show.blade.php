@@ -7,35 +7,35 @@
 <div class="space-y-6 max-w-5xl mx-auto">
 
     @if(session('success'))
-        <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2">
-            <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2 font-medium shadow-sm">
+            <svg class="w-5 h-5 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
             <span>{{ session('success') }}</span>
         </div>
     @endif
     @if(session('error'))
-        <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
-            <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 font-medium shadow-sm">
+            <svg class="w-5 h-5 shrink-0 text-rose-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
             <span>{{ session('error') }}</span>
         </div>
     @endif
 
     <!-- Header Summary Card -->
-    <div class="p-5 md:p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-[#0a1533] to-[#040817] border border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div class="p-5 md:p-6 rounded-2xl bg-gradient-to-r from-[#002266] to-[#0044cc] shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
             <div class="flex items-center gap-3">
-                <span class="font-mono text-xs md:text-sm font-bold text-blue-400">{{ $kunjungan->nomor }}</span>
-                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold {{ $kunjungan->status == 'Selesai' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : ($kunjungan->status == 'Dikerjakan' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20') }}">
+                <span class="font-mono text-xs md:text-sm font-bold text-white bg-white/20 px-2 py-1 rounded-lg">{{ $kunjungan->nomor }}</span>
+                <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-[#002266] shadow-sm">
                     {{ $kunjungan->status }}
                 </span>
             </div>
-            <h2 class="text-lg md:text-xl font-bold text-white mt-1">{{ $kunjungan->pekerjaan }}</h2>
-            <p class="text-xs text-slate-400 mt-0.5">{{ $kunjungan->customer->nama_perusahaan ?? '-' }} • {{ $kunjungan->lokasi }}</p>
+            <h2 class="text-lg md:text-xl font-bold text-white mt-3">{{ $kunjungan->pekerjaan }}</h2>
+            <p class="text-xs text-blue-200 mt-1 font-medium">{{ $kunjungan->customer->nama_perusahaan ?? '-' }} • {{ $kunjungan->lokasi }}</p>
         </div>
         <div class="flex items-center gap-3">
             @if($kunjungan->status == 'Selesai' || $kunjungan->laporan)
                 <a href="{{ route('laporan.pdf', $kunjungan->id_kunjungan) }}" target="_blank" 
-                   class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-lg shadow-rose-600/30 transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                   class="px-4 py-2.5 bg-white hover:bg-slate-100 text-[#002266] rounded-xl text-xs font-bold flex items-center gap-2 shadow-md transition">
+                    <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     <span>Cetak PDF Laporan</span>
                 </a>
             @endif
@@ -43,19 +43,19 @@
     </div>
 
     <!-- Stepper Status Kunjungan -->
-    <div class="p-4 md:p-6 rounded-2xl bg-white/[0.03] border border-slate-800/80">
-        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Status Alur Kunjungan</h4>
+    <div class="p-4 md:p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Status Alur Kunjungan</h4>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
-            <div class="p-2.5 rounded-xl bg-blue-600/10 border border-blue-500/30 text-blue-400 font-medium">
+            <div class="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-[#003399] font-bold">
                 1. Terjadwal
             </div>
-            <div class="p-2.5 rounded-xl {{ in_array($kunjungan->status, ['Dikerjakan', 'Selesai']) ? 'bg-blue-600/10 border border-blue-500/30 text-blue-400 font-medium' : 'bg-slate-900/50 text-slate-600 border border-slate-800' }}">
+            <div class="p-2.5 rounded-xl font-bold {{ in_array($kunjungan->status, ['Dikerjakan', 'Selesai']) ? 'bg-blue-50 border border-blue-200 text-[#003399]' : 'bg-slate-50 text-slate-400 border border-slate-200' }}">
                 2. Check-in (GPS)
             </div>
-            <div class="p-2.5 rounded-xl {{ in_array($kunjungan->status, ['Dikerjakan', 'Selesai']) ? 'bg-blue-600/10 border border-blue-500/30 text-blue-400 font-medium' : 'bg-slate-900/50 text-slate-600 border border-slate-800' }}">
+            <div class="p-2.5 rounded-xl font-bold {{ in_array($kunjungan->status, ['Dikerjakan', 'Selesai']) ? 'bg-blue-50 border border-blue-200 text-[#003399]' : 'bg-slate-50 text-slate-400 border border-slate-200' }}">
                 3. On-Site & Foto
             </div>
-            <div class="p-2.5 rounded-xl {{ $kunjungan->status == 'Selesai' ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-medium' : 'bg-slate-900/50 text-slate-600 border border-slate-800' }}">
+            <div class="p-2.5 rounded-xl font-bold {{ $kunjungan->status == 'Selesai' ? 'bg-emerald-50 border border-emerald-200 text-emerald-600' : 'bg-slate-50 text-slate-400 border border-slate-200' }}">
                 4. TTD Customer
             </div>
         </div>
@@ -65,28 +65,28 @@
     @if(Auth::user()->id_role == 3 && $kunjungan->status == 'Terjadwal')
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Kotak Check-In -->
-            <div class="p-6 rounded-2xl bg-gradient-to-r from-blue-950/40 to-slate-900 border border-blue-500/30 text-center space-y-3">
-                <h4 class="text-sm font-bold text-white">Sudah Tiba di Lokasi Klien?</h4>
-                <p class="text-xs text-slate-400">Klik tombol di bawah ini untuk mencatat koordinat GPS dan memulai pengerjaan.</p>
+            <div class="p-6 rounded-2xl bg-blue-50 border border-blue-200 text-center space-y-3">
+                <h4 class="text-sm font-bold text-[#002266]">Sudah Tiba di Lokasi Klien?</h4>
+                <p class="text-xs text-slate-600 font-medium">Klik tombol di bawah ini untuk mencatat koordinat GPS dan memulai pengerjaan.</p>
                 
                 <form id="formCheckIn" action="{{ route('kunjungan.checkin', $kunjungan->id_kunjungan) }}" method="POST">
                     @csrf
                     <input type="hidden" name="lokasi_gps" id="lokasi_gps_checkin">
-                    <button type="button" onclick="getGPSCheckIn()" class="w-full px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/40 transition">
+                    <button type="button" onclick="getGPSCheckIn()" class="w-full px-4 py-3 bg-[#002266] hover:bg-[#001233] text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-900/20 transition">
                         📍 Ambil Lokasi GPS & Check-In
                     </button>
                 </form>
             </div>
 
             <!-- Kotak Tolak / Reschedule Jadwal -->
-            <div class="p-6 rounded-2xl bg-gradient-to-r from-rose-950/40 to-slate-900 border border-rose-500/30 space-y-3">
-                <h4 class="text-sm font-bold text-white">Jadwal Bentrok / Berhalangan?</h4>
-                <p class="text-xs text-slate-400">Tolak jadwal ini dan berikan alasan agar Pimpinan bisa melakukan penjadwalan ulang.</p>
+            <div class="p-6 rounded-2xl bg-rose-50 border border-rose-200 space-y-3">
+                <h4 class="text-sm font-bold text-rose-700">Jadwal Bentrok / Berhalangan?</h4>
+                <p class="text-xs text-rose-600 font-medium">Tolak jadwal ini dan berikan alasan agar Pimpinan bisa melakukan penjadwalan ulang.</p>
                 
                 <form action="{{ route('kunjungan.reschedule', $kunjungan->id_kunjungan) }}" method="POST" class="space-y-2">
                     @csrf
-                    <input type="text" name="alasan_reschedule" required placeholder="Alasan (Contoh: Jadwal bentrok / sakit)" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
-                   <button type="button" onclick="if(!this.form.checkValidity()) { this.form.reportValidity(); return; } showConfirmModal(this.form, 'Tolak & Reschedule', 'Apakah Anda yakin ingin menolak dan meminta reschedule jadwal ini?')" class="w-full py-2.5 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 rounded-xl text-xs font-bold transition">
+                    <input type="text" name="alasan_reschedule" required placeholder="Alasan (Contoh: Jadwal bentrok / sakit)" class="w-full px-3 py-2.5 bg-white border border-slate-300 focus:border-rose-400 focus:ring-rose-400 rounded-xl text-xs text-slate-800">
+                   <button type="button" onclick="if(!this.form.checkValidity()) { this.form.reportValidity(); return; } showConfirmModal(this.form, 'Tolak & Reschedule', 'Apakah Anda yakin ingin menolak dan meminta reschedule jadwal ini?')" class="w-full py-2.5 bg-white hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-300 rounded-xl text-xs font-bold transition">
                    ❌ Tolak & Minta Reschedule
                    </button>
                 </form>
@@ -94,26 +94,25 @@
         </div>
     @endif
 
-    <!-- Jika statusnya sudah Reschedule -->
     @if($kunjungan->status == 'Reschedule')
-        <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex flex-col gap-1">
+        <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex flex-col gap-1 shadow-sm">
             <span class="font-bold">⚠️ Status: Jadwal Perlu Dijadwalkan Ulang (Reschedule)</span>
-            <p>Alasan penolakan dari Engineer: "{{ $kunjungan->alasan_reschedule }}"</p>
+            <p class="font-medium">Alasan penolakan dari Engineer: "{{ $kunjungan->alasan_reschedule }}"</p>
         </div>
     @endif
 
     <!-- SECTION 2: Pelaksanaan & Upload Dokumentasi Foto Lapangan -->
     @if(Auth::user()->id_role == 3 && $kunjungan->status == 'Dikerjakan')
-        <div class="p-5 md:p-6 rounded-2xl bg-white/[0.03] border border-slate-800/80 space-y-4">
-            <h4 class="text-sm font-bold text-white flex items-center gap-2">
+        <div class="p-5 md:p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
+            <h4 class="text-sm font-bold text-[#002266] flex items-center gap-2">
                 📷 Unggah Dokumentasi Lapangan (On-Site)
             </h4>
-            <form action="{{ route('kunjungan.dokumentasi', $kunjungan->id_kunjungan) }}" method="POST" enctype="multipart/form-data" class="space-y-3 text-xs">
+            <form action="{{ route('kunjungan.dokumentasi', $kunjungan->id_kunjungan) }}" method="POST" enctype="multipart/form-data" class="space-y-4 text-xs font-medium">
                 @csrf
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-slate-400 mb-1">Kategori Foto</label>
-                        <select name="kategori_foto" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                        <label class="block text-slate-700 mb-1.5 font-bold">Kategori Foto</label>
+                        <select name="kategori_foto" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:ring-[#003399]">
                             <option value="Sebelum">Foto Sebelum Pengerjaan</option>
                             <option value="Proses">Foto Saat Pengerjaan</option>
                             <option value="Sesudah">Foto Setelah Selesai</option>
@@ -121,31 +120,31 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-slate-400 mb-1">Pilih File Foto (Bisa dari Kamera HP)</label>
-                        <input type="file" name="foto" accept="image/*" capture="environment" required class="w-full text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:bg-blue-600 file:text-white">
+                        <label class="block text-slate-700 mb-1.5 font-bold">Pilih File Foto (Bisa dari Kamera HP)</label>
+                        <input type="file" name="foto" accept="image/*" capture="environment" required class="w-full text-slate-600 file:mr-3 file:py-1.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#002266] file:text-white hover:file:bg-[#001233]">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-slate-400 mb-1">Keterangan Foto</label>
-                    <input type="text" name="keterangan" placeholder="Contoh: Kondisi port switch sebelum pergantian modul" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                    <label class="block text-slate-700 mb-1.5 font-bold">Keterangan Foto</label>
+                    <input type="text" name="keterangan" placeholder="Contoh: Kondisi port switch sebelum pergantian modul" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:ring-[#003399]">
                 </div>
-                <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium">Unggah Foto Dokumentasi</button>
+                <button type="submit" class="px-5 py-2.5 bg-[#0044cc] hover:bg-[#003399] text-white rounded-xl font-bold shadow-md">Unggah Foto Dokumentasi</button>
             </form>
         </div>
     @endif
 
     <!-- SECTION 2.5: Form Pencatatan Pengeluaran (Expense) -->
     @if(Auth::user()->id_role == 3 && $kunjungan->status == 'Dikerjakan')
-        <div class="p-5 md:p-6 rounded-2xl bg-white/[0.03] border border-slate-800/80 space-y-4">
-            <h4 class="text-sm font-bold text-white flex items-center gap-2">
+        <div class="p-5 md:p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
+            <h4 class="text-sm font-bold text-slate-800 flex items-center gap-2">
                 💸 Catat Pengeluaran Operasional
             </h4>
-            <form action="{{ route('kunjungan.pengeluaran', $kunjungan->id_kunjungan) }}" method="POST" enctype="multipart/form-data" class="space-y-3 text-xs">
+            <form action="{{ route('kunjungan.pengeluaran', $kunjungan->id_kunjungan) }}" method="POST" enctype="multipart/form-data" class="space-y-4 text-xs font-medium">
                 @csrf
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-slate-400 mb-1">Jenis Biaya</label>
-                        <select name="jenis_biaya" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                        <label class="block text-slate-700 mb-1.5 font-bold">Jenis Biaya</label>
+                        <select name="jenis_biaya" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:ring-[#003399]">
                             <option value="Bensin">Bensin / BBM</option>
                             <option value="Tol">Tol</option>
                             <option value="Parkir">Parkir</option>
@@ -155,41 +154,41 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-slate-400 mb-1">Nominal (Rp)</label>
-                        <input type="number" name="nominal" min="0" required placeholder="Contoh: 50000" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                        <label class="block text-slate-700 mb-1.5 font-bold">Nominal (Rp)</label>
+                        <input type="number" name="nominal" min="0" required placeholder="Contoh: 50000" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:ring-[#003399]">
                     </div>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-slate-400 mb-1">Bukti Foto Nota / Struk (Opsional)</label>
-                        <input type="file" name="bukti_nota" accept="image/*" capture="environment" class="w-full text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:bg-blue-600 file:text-white">
+                        <label class="block text-slate-700 mb-1.5 font-bold">Bukti Foto Nota / Struk (Opsional)</label>
+                        <input type="file" name="bukti_nota" accept="image/*" capture="environment" class="w-full text-slate-600 file:mr-3 file:py-1.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-200 file:text-slate-800 hover:file:bg-slate-300">
                     </div>
                     <div>
-                        <label class="block text-slate-400 mb-1">Keterangan Tambahan</label>
-                        <input type="text" name="keterangan" placeholder="Contoh: Beli kabel LAN 5 meter" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                        <label class="block text-slate-700 mb-1.5 font-bold">Keterangan Tambahan</label>
+                        <input type="text" name="keterangan" placeholder="Contoh: Beli kabel LAN 5 meter" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:ring-[#003399]">
                     </div>
                 </div>
-                <button type="submit" class="px-5 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-medium">Simpan Pengeluaran</button>
+                <button type="submit" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold shadow-md">Simpan Pengeluaran</button>
             </form>
         </div>
     @endif
 
-    <!-- SECTION 3: Form Pembuatan Laporan Siap Pakai (Engineer Input Deskripsi) -->
+    <!-- SECTION 3: Form Pembuatan Laporan Siap Pakai -->
     @if(Auth::user()->id_role == 3 && $kunjungan->status == 'Dikerjakan')
-        <div class="p-5 md:p-6 rounded-2xl bg-white/[0.03] border border-blue-500/40 space-y-4">
-            <h4 class="text-sm font-bold text-white">📝 Input Catatan & Check-Out</h4>
-            <p class="text-xs text-slate-400">Tuliskan ringkasan hasil pengerjaan. Sistem akan memverifikasi lokasi GPS Anda untuk proses Check-Out.</p>
+        <div class="p-5 md:p-6 rounded-2xl bg-blue-50 border border-blue-200 shadow-sm space-y-4">
+            <h4 class="text-sm font-bold text-[#002266]">📝 Input Catatan & Check-Out</h4>
+            <p class="text-xs text-slate-600 font-medium">Tuliskan ringkasan hasil pengerjaan. Sistem akan memverifikasi lokasi GPS Anda untuk proses Check-Out.</p>
             
-            <form id="formCheckOut" action="{{ route('kunjungan.checkout', $kunjungan->id_kunjungan) }}" method="POST" class="space-y-3 text-xs">
+            <form id="formCheckOut" action="{{ route('kunjungan.checkout', $kunjungan->id_kunjungan) }}" method="POST" class="space-y-4 text-xs">
                 @csrf
                 <input type="hidden" name="lokasi_gps" id="lokasi_gps_checkout"> 
                 
                 <div>
-                    <label class="block text-slate-300 font-medium mb-1">Deskripsi / Hasil Pekerjaan Lapangan:</label>
-                    <textarea name="catatan" id="catatan_pekerjaan" rows="4" required placeholder="Contoh: Pemeliharaan berkala server dan perapihan cabling rack selesai 100%." class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
+                    <label class="block text-slate-700 font-bold mb-1.5">Deskripsi / Hasil Pekerjaan Lapangan:</label>
+                    <textarea name="catatan" id="catatan_pekerjaan" rows="4" required placeholder="Contoh: Pemeliharaan berkala server dan perapihan cabling rack selesai 100%." class="w-full p-3 bg-white border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]"></textarea>
                 </div>
                 
-                <button type="button" onclick="getGPSCheckOut()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30 transition">
+                <button type="button" onclick="getGPSCheckOut()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition">
                     📍 Ambil GPS Check-Out & Buat Laporan
                 </button>
             </form>
@@ -198,27 +197,26 @@
 
     <!-- SECTION 4: Kotak Tanda Tangan Digital Khusus Customer -->
     @if(($kunjungan->status == 'Dikerjakan' && $kunjungan->laporan) || ($kunjungan->laporan && !$kunjungan->laporan->buktiPenyelesaian))
-        <div class="p-5 md:p-6 rounded-2xl bg-white/[0.04] border border-amber-500/40 space-y-4">
+        <div class="p-5 md:p-6 rounded-2xl bg-amber-50 border border-amber-200 shadow-sm space-y-4">
             <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-amber-400 animate-ping"></span>
-                <h4 class="text-sm font-bold text-amber-300">✍ Verifikasi Tanda Tangan Customer</h4>
+                <span class="w-3 h-3 rounded-full bg-amber-500 animate-ping"></span>
+                <h4 class="text-sm font-bold text-amber-700">✍ Verifikasi Tanda Tangan Customer</h4>
             </div>
-            <p class="text-xs text-slate-300">Silakan sodorkan HP ke Customer / PIC <strong>({{ $kunjungan->customer->pic ?? 'PIC Perusahaan' }})</strong> untuk membubuhkan tanda tangan langsung pada kotak putih di bawah:</p>
+            <p class="text-xs text-amber-800 font-medium">Silakan sodorkan HP ke Customer / PIC <strong>({{ $kunjungan->customer->pic ?? 'PIC Perusahaan' }})</strong> untuk membubuhkan tanda tangan langsung pada kotak di bawah:</p>
             
             <form id="signatureForm" action="{{ route('kunjungan.signature', $kunjungan->id_kunjungan) }}" method="POST" class="space-y-4">
                 @csrf
                 <input type="hidden" name="signature" id="signatureInput">
                 
-                <!-- Kotak Canvas TTD -->
-                <div class="border-2 border-slate-600 bg-white rounded-xl overflow-hidden shadow-inner touch-none">
+                <div class="border-2 border-slate-300 bg-white rounded-xl overflow-hidden shadow-inner touch-none">
                     <canvas id="signaturePad" class="w-full h-56 block cursor-crosshair"></canvas>
                 </div>
 
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <button type="button" onclick="clearSignature()" class="w-full sm:w-auto px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs hover:bg-slate-700">
+                    <button type="button" onclick="clearSignature()" class="w-full sm:w-auto px-4 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition">
                         Hapus & Ulangi TTD
                     </button>
-                    <button type="button" onclick="submitSignature()" class="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-blue-600/30">
+                    <button type="button" onclick="submitSignature()" class="w-full sm:w-auto px-6 py-2.5 bg-[#002266] hover:bg-[#001233] text-white font-bold rounded-xl text-xs shadow-lg shadow-blue-900/20 transition">
                         Selesaikan & Kunci Laporan Resmi
                     </button>
                 </div>
@@ -226,14 +224,14 @@
         </div>
     @endif
 
-    <!-- SECTION 5: Bukti Dokumen Terverifikasi & Tanda Tangan Tersimpan -->
+    <!-- SECTION 5: Bukti Dokumen Terverifikasi -->
     @if($kunjungan->laporan && $kunjungan->laporan->buktiPenyelesaian)
-        <div class="p-5 md:p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="p-5 md:p-6 rounded-2xl bg-emerald-50 border border-emerald-200 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
             <div>
-                <h4 class="text-sm font-bold text-emerald-400">Pekerjaan Selesai & Dokumen Terverifikasi Resmi</h4>
-                <p class="text-xs text-slate-400 mt-1">Ditandatangani oleh PIC pada: {{ $kunjungan->laporan->buktiPenyelesaian->tanggal_tanda_tangan }}</p>
+                <h4 class="text-sm font-bold text-emerald-700">Pekerjaan Selesai & Dokumen Terverifikasi Resmi</h4>
+                <p class="text-xs text-emerald-600 font-medium mt-1">Ditandatangani oleh PIC pada: {{ $kunjungan->laporan->buktiPenyelesaian->tanggal_tanda_tangan }}</p>
             </div>
-            <div class="bg-white p-2 rounded-xl border border-slate-700">
+            <div class="bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
                 <img src="{{ $kunjungan->laporan->buktiPenyelesaian->tanda_tangan_customer }}" alt="Customer Signature" class="h-14 object-contain">
             </div>
         </div>
@@ -241,84 +239,82 @@
 
     <!-- SECTION 6: Detail Informasi Tiket, Tools & Log GPS -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Informasi Kunjungan & Alat -->
-        <div class="p-5 rounded-2xl bg-white/[0.03] border border-slate-800/80 space-y-3 text-xs">
-            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Detail Informasi Tiket</h4>
-            <div class="space-y-1.5 text-slate-400">
-                <p><strong class="text-white">Customer:</strong> {{ $kunjungan->customer->nama_perusahaan ?? '-' }}</p>
-                <p><strong class="text-white">PIC:</strong> {{ $kunjungan->customer->pic ?? '-' }} ({{ $kunjungan->customer->telepon ?? '-' }})</p>
-                <p><strong class="text-white">Lead Engineer:</strong> {{ $kunjungan->engineer->user->nama ?? 'Belum Ditugaskan' }}</p>
-                <p><strong class="text-white">Tim Support:</strong> 
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3 text-xs">
+            <h4 class="text-xs font-bold text-[#002266] uppercase tracking-wider border-b border-slate-100 pb-2">Detail Informasi Tiket</h4>
+            <div class="space-y-2 font-medium text-slate-600">
+                <p><strong class="text-slate-800">Customer:</strong> {{ $kunjungan->customer->nama_perusahaan ?? '-' }}</p>
+                <p><strong class="text-slate-800">PIC:</strong> {{ $kunjungan->customer->pic ?? '-' }} ({{ $kunjungan->customer->telepon ?? '-' }})</p>
+                <p><strong class="text-slate-800">Lead Engineer:</strong> {{ $kunjungan->engineer->user->nama ?? 'Belum Ditugaskan' }}</p>
+                <p><strong class="text-slate-800">Tim Support:</strong> 
                     @if($kunjungan->supportEngineers->count() > 0)
                         {{ $kunjungan->supportEngineers->pluck('user.nama')->implode(', ') }}
                     @else
-                        <span class="italic text-slate-500">Tidak ada tim support</span>
+                        <span class="italic text-slate-400">Tidak ada tim support</span>
                     @endif
                 </p>
-                <p><strong class="text-white">Alat Kerja Terbawa:</strong></p>
-                <ul class="list-disc list-inside text-slate-300 pl-2">
+                <p><strong class="text-slate-800">Alat Kerja Terbawa:</strong></p>
+                <ul class="list-disc list-inside pl-2">
                     @forelse($kunjungan->tools as $tool)
                         <li>{{ $tool->nama_alat }} ({{ $tool->kode }})</li>
                     @empty
-                        <li class="italic text-slate-500">Tidak ada tools khusus</li>
+                        <li class="italic text-slate-400">Tidak ada tools khusus</li>
                     @endforelse
                 </ul>
             </div>
         </div>
 
-        <!-- Log Aktivitas GPS & Waktu -->
-        <div class="p-5 rounded-2xl bg-white/[0.03] border border-slate-800/80 space-y-3 text-xs">
-            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Log Waktu & Lokasi GPS</h4>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3 text-xs">
+            <h4 class="text-xs font-bold text-[#002266] uppercase tracking-wider border-b border-slate-100 pb-2">Log Waktu & Lokasi GPS</h4>
             @php $act = $kunjungan->aktivitas->last(); @endphp
-            <div class="space-y-1.5 text-slate-400">
-                <p><strong class="text-white">Koordinat Check-in:</strong> <span class="font-mono text-blue-400">{{ $act->lokasi ?? 'Belum check-in' }}</span></p>
-                <p><strong class="text-white">Waktu Check-in:</strong> {{ $act->waktu_mulai ?? '-' }}</p>
-                <p><strong class="text-white">Waktu Check-out:</strong> {{ $act->waktu_selesai ?? '-' }}</p>
-                <p><strong class="text-white">Catatan Engineer:</strong> {{ $act->catatan ?? '-' }}</p>
+            <div class="space-y-2 font-medium text-slate-600">
+                <p><strong class="text-slate-800">Koordinat Check-in:</strong> <span class="font-mono font-bold text-[#003399]">{{ $act->lokasi ?? 'Belum check-in' }}</span></p>
+                <p><strong class="text-slate-800">Waktu Check-in:</strong> {{ $act->waktu_mulai ?? '-' }}</p>
+                <p><strong class="text-slate-800">Waktu Check-out:</strong> {{ $act->waktu_selesai ?? '-' }}</p>
+                <p><strong class="text-slate-800">Catatan Engineer:</strong> {{ $act->catatan ?? '-' }}</p>
             </div>
         </div>
     </div>
 
     <!-- Tabel Rincian Pengeluaran -->
-    <div class="p-5 md:p-6 rounded-2xl bg-white/[0.03] border border-slate-800/80">
-        <h4 class="text-sm font-semibold text-slate-200 mb-4">Rincian Pengeluaran Operasional</h4>
+    <div class="p-5 md:p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <h4 class="text-sm font-bold text-[#002266] mb-4">Rincian Pengeluaran Operasional</h4>
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-300">
-                <thead class="text-[11px] uppercase bg-slate-900/80 text-slate-400 border-b border-slate-800">
+            <table class="w-full text-left text-xs text-slate-600">
+                <thead class="text-[11px] uppercase bg-slate-50 text-slate-500 border-b border-slate-200">
                     <tr>
-                        <th class="p-3">Jenis Biaya</th>
-                        <th class="p-3">Nominal (Rp)</th>
-                        <th class="p-3">Keterangan</th>
-                        <th class="p-3">Bukti Nota</th>
+                        <th class="p-3 font-bold">Jenis Biaya</th>
+                        <th class="p-3 font-bold">Nominal (Rp)</th>
+                        <th class="p-3 font-bold">Keterangan</th>
+                        <th class="p-3 font-bold">Bukti Nota</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-800/60">
+                <tbody class="divide-y divide-slate-100">
                     @php $totalPengeluaran = 0; @endphp
                     @forelse($kunjungan->pengeluaran as $peng)
                         @php $totalPengeluaran += $peng->nominal; @endphp
-                        <tr class="hover:bg-slate-800/20">
-                            <td class="p-3 font-semibold text-white">{{ $peng->jenis_biaya }}</td>
-                            <td class="p-3 text-emerald-400">Rp {{ number_format($peng->nominal, 0, ',', '.') }}</td>
+                        <tr class="hover:bg-slate-50 font-medium">
+                            <td class="p-3 font-bold text-slate-800">{{ $peng->jenis_biaya }}</td>
+                            <td class="p-3 text-emerald-600 font-bold">Rp {{ number_format($peng->nominal, 0, ',', '.') }}</td>
                             <td class="p-3">{{ $peng->keterangan ?? '-' }}</td>
                             <td class="p-3">
                                 @if($peng->bukti_nota)
-                                    <a href="{{ asset($peng->bukti_nota) }}" target="_blank" class="text-blue-400 hover:underline">Lihat Foto</a>
+                                    <a href="{{ asset($peng->bukti_nota) }}" target="_blank" class="text-[#0044cc] hover:underline font-bold">Lihat Foto</a>
                                 @else
-                                    <span class="text-slate-500 italic">Tidak ada struk</span>
+                                    <span class="text-slate-400 italic">Tidak ada struk</span>
                                 @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="p-4 text-center text-slate-500 italic">Belum ada catatan pengeluaran.</td>
+                            <td colspan="4" class="p-4 text-center text-slate-400 font-medium italic">Belum ada catatan pengeluaran.</td>
                         </tr>
                     @endforelse
                 </tbody>
                 @if($totalPengeluaran > 0)
                     <tfoot>
-                        <tr class="bg-slate-900/50 font-bold">
-                            <td class="p-3 text-right text-white">TOTAL KESELURUHAN:</td>
-                            <td class="p-3 text-emerald-400 text-sm">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</td>
+                        <tr class="bg-slate-50 font-bold border-t-2 border-slate-200">
+                            <td class="p-3 text-right text-slate-800">TOTAL KESELURUHAN:</td>
+                            <td class="p-3 text-emerald-600 text-sm">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</td>
                             <td colspan="2"></td>
                         </tr>
                     </tfoot>
@@ -328,65 +324,57 @@
     </div>
 
     <!-- Galeri Foto Lapangan -->
-    <div class="p-5 md:p-6 rounded-2xl bg-white/[0.03] border border-slate-800/80">
-        <h4 class="text-sm font-semibold text-slate-200 mb-4">Galeri Dokumentasi On-Site</h4>
+    <div class="p-5 md:p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <h4 class="text-sm font-bold text-[#002266] mb-4">Galeri Dokumentasi On-Site</h4>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             @forelse($kunjungan->dokumentasi as $doc)
-                <div class="rounded-xl overflow-hidden bg-slate-900 border border-slate-800">
+                <div class="rounded-xl overflow-hidden bg-slate-50 border border-slate-200 shadow-sm">
                     <img src="{{ asset($doc->file_foto) }}" alt="Dokumentasi" class="w-full h-32 object-cover">
                     <div class="p-2 text-[10px]">
-                        <span class="px-2 py-0.5 rounded bg-blue-600/20 text-blue-400 font-semibold uppercase">{{ $doc->kategori_foto }}</span>
-                        <p class="text-slate-400 mt-1 truncate">{{ $doc->keterangan ?? '-' }}</p>
+                        <span class="px-2 py-0.5 rounded bg-blue-100 text-[#003399] font-bold uppercase">{{ $doc->kategori_foto }}</span>
+                        <p class="text-slate-600 mt-1.5 font-medium truncate">{{ $doc->keterangan ?? '-' }}</p>
                     </div>
                 </div>
             @empty
-                <div class="col-span-full text-center py-6 text-slate-500 text-xs italic">Belum ada foto dokumentasi diunggah.</div>
+                <div class="col-span-full text-center py-6 text-slate-400 text-xs font-medium italic">Belum ada foto dokumentasi diunggah.</div>
             @endforelse
         </div>
     </div>
 
 </div>
 
-<!-- ========================================== -->
-<!-- MODAL INFO KHUSUS ALERT (ERROR / WARNING)  -->
-<!-- ========================================== -->
-<div id="modalInfoGPS" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-    <div class="bg-[#0b132b] border border-slate-700/80 rounded-2xl w-full max-w-xs p-6 shadow-2xl text-center transition-all">
+<!-- MODAL INFO KHUSUS ALERT -->
+<div id="modalInfoGPS" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-xs p-6 shadow-2xl text-center transition-all">
         <div id="modalInfoIcon" class="mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-4">
-            <!-- Ikon akan disuntik dari JS -->
+            <!-- Ikon disuntik via JS -->
         </div>
-        <h3 id="modalInfoTitle" class="text-base font-bold text-white mb-2"></h3>
-        <p id="modalInfoMessage" class="text-xs text-slate-300 mb-6 leading-relaxed"></p>
-        <button type="button" onclick="document.getElementById('modalInfoGPS').classList.add('hidden')" class="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-xs transition">
+        <h3 id="modalInfoTitle" class="text-base font-bold text-[#002266] mb-2"></h3>
+        <p id="modalInfoMessage" class="text-xs text-slate-600 mb-6 font-medium leading-relaxed"></p>
+        <button type="button" onclick="document.getElementById('modalInfoGPS').classList.add('hidden')" class="w-full px-4 py-2.5 bg-[#002266] hover:bg-[#001233] text-white font-bold rounded-xl text-xs transition">
             Tutup
         </button>
     </div>
 </div>
-<!-- ========================================== -->
 
-<!-- Script Signature Pad & GPS -->
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 <script>
-    // Fungsi untuk menampilkan Custom Modal (Pengganti alert bawaan)
     function showGPSModal(title, message, isSuccess) {
         document.getElementById('modalInfoTitle').innerText = title;
         document.getElementById('modalInfoMessage').innerText = message;
         
         const iconContainer = document.getElementById('modalInfoIcon');
         if(isSuccess) {
-            iconContainer.className = 'mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-4 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+            iconContainer.className = 'mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-4 bg-emerald-100 text-emerald-600 border border-emerald-200';
             iconContainer.innerHTML = '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
         } else {
-            iconContainer.className = 'mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-4 bg-rose-500/20 text-rose-400 border border-rose-500/30';
+            iconContainer.className = 'mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-4 bg-rose-100 text-rose-600 border border-rose-200';
             iconContainer.innerHTML = '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
         }
         
         document.getElementById('modalInfoGPS').classList.remove('hidden');
     }
 
-    // ==========================================
-    // FUNGSI Check-In
-    // ==========================================
     function getGPSCheckIn() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -409,9 +397,6 @@
         }
     }
 
-    // ==========================================
-    // FUNGSI Check-Out
-    // ==========================================
     function getGPSCheckOut() {
         const catatan = document.getElementById('catatan_pekerjaan').value;
         if (!catatan.trim()) {
@@ -440,9 +425,6 @@
         }
     }
 
-    // ==========================================
-    // FUNGSI SIGNATURE PAD
-    // ==========================================
     let signaturePad;
     document.addEventListener('DOMContentLoaded', () => {
         const canvas = document.getElementById('signaturePad');

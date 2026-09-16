@@ -8,77 +8,76 @@
 
     <!-- KPI Operasional -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-        <div class="p-5 rounded-2xl bg-white/[0.03] border border-slate-800/80">
-            <p class="text-xs font-medium text-slate-400">Kunjungan Hari Ini</p>
-            <h3 class="text-2xl font-bold text-blue-400 mt-1">{{ $kunjunganHariIni }}</h3>
-            <p class="text-[11px] text-slate-500 mt-2">Jadwal tanggal {{ date('d M Y') }}</p>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <p class="text-xs font-semibold text-slate-500">Kunjungan Hari Ini</p>
+            <h3 class="text-2xl font-bold text-[#002266] mt-1">{{ $kunjunganHariIni }}</h3>
+            <p class="text-[11px] text-slate-500 mt-2 font-medium">Jadwal tanggal {{ date('d M Y') }}</p>
         </div>
-        <div class="p-5 rounded-2xl bg-white/[0.03] border border-slate-800/80">
-            <p class="text-xs font-medium text-slate-400">Engineer Tersedia</p>
-            <h3 class="text-2xl font-bold text-emerald-400 mt-1">{{ $engineerTersedia }}</h3>
-            <p class="text-[11px] text-slate-500 mt-2">Siap ditugaskan</p>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <p class="text-xs font-semibold text-slate-500">Engineer Tersedia</p>
+            <h3 class="text-2xl font-bold text-emerald-600 mt-1">{{ $engineerTersedia }}</h3>
+            <p class="text-[11px] text-slate-500 mt-2 font-medium">Siap ditugaskan</p>
         </div>
-        <div class="p-5 rounded-2xl bg-white/[0.03] border border-slate-800/80">
-            <p class="text-xs font-medium text-slate-400">Tools / Alat Siap Pakai</p>
-            <h3 class="text-2xl font-bold text-indigo-400 mt-1">{{ $toolTersedia }}</h3>
-            <p class="text-[11px] text-slate-500 mt-2">Kondisi baik & tersedia</p>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <p class="text-xs font-semibold text-slate-500">Tools / Alat Siap Pakai</p>
+            <h3 class="text-2xl font-bold text-indigo-600 mt-1">{{ $toolTersedia }}</h3>
+            <p class="text-[11px] text-slate-500 mt-2 font-medium">Kondisi baik & tersedia</p>
         </div>
-        <div class="p-5 rounded-2xl bg-white/[0.03] border border-slate-800/80">
-            <p class="text-xs font-medium text-slate-400">Total Kunjungan</p>
-            <h3 class="text-2xl font-bold text-white mt-1">{{ $totalKunjungan }}</h3>
-            <p class="text-[11px] text-slate-500 mt-2">Sepanjang masa</p>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <p class="text-xs font-semibold text-slate-500">Total Kunjungan</p>
+            <h3 class="text-2xl font-bold text-[#002266] mt-1">{{ $totalKunjungan }}</h3>
+            <p class="text-[11px] text-slate-500 mt-2 font-medium">Sepanjang masa</p>
         </div>
     </div>
 
     <!-- Quick Action Card -->
-    <div class="p-6 rounded-2xl bg-gradient-to-r from-blue-900/40 via-indigo-950/40 to-slate-900/60 border border-blue-500/20 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="p-6 rounded-2xl bg-gradient-to-r from-[#002266] to-[#0044cc] border border-[#001a4d] flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg shadow-blue-900/10">
         <div>
-            <h4 class="text-base font-semibold text-white">Buat Jadwal Kunjungan Baru</h4>
-            <p class="text-xs text-slate-300 mt-1">Jadwalkan kunjungan teknis ke lokasi customer dan tugaskan engineer.</p>
+            <h4 class="text-base font-bold text-white">Buat Jadwal Kunjungan Baru</h4>
+            <p class="text-xs text-blue-200 mt-1 font-medium">Jadwalkan kunjungan teknis ke lokasi customer dan tugaskan engineer.</p>
         </div>
-        <!-- INI TOMBOLNYA UDAH DITAMBAHIN ONCLICK BIAR BISA PINDAH HALAMAN -->
-        <button onclick="window.location.href='{{ route('kunjungan.index') }}'" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-blue-600/30 transition">
+        <button onclick="window.location.href='{{ route('kunjungan.index') }}'" class="px-5 py-2.5 bg-white hover:bg-slate-50 text-[#002266] text-xs font-bold rounded-xl shadow-md transition">
             + Jadwalkan Kunjungan
         </button>
     </div>
 
     <!-- Daftar Kunjungan Aktif -->
-    <div class="p-6 rounded-2xl bg-white/[0.03] border border-slate-800/80">
-        <h4 class="text-sm font-semibold text-slate-200 mb-4">Daftar Kunjungan Operasional</h4>
+    <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <h4 class="text-sm font-bold text-[#002266] mb-4">Daftar Kunjungan Operasional</h4>
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-300">
-                <thead class="text-[11px] uppercase bg-slate-900/80 text-slate-400">
+            <table class="w-full text-left text-xs text-slate-600">
+                <thead class="text-[11px] uppercase bg-slate-50 text-slate-500 border-b border-slate-200">
                     <tr>
-                        <th class="p-3">Nomor</th>
-                        <th class="p-3">Customer & Lokasi</th>
-                        <th class="p-3">Engineer Bertugas</th>
-                        <th class="p-3">Tools Dibawa</th>
-                        <th class="p-3">Status</th>
+                        <th class="p-3 font-bold">Nomor</th>
+                        <th class="p-3 font-bold">Customer & Lokasi</th>
+                        <th class="p-3 font-bold">Engineer Bertugas</th>
+                        <th class="p-3 font-bold">Tools Dibawa</th>
+                        <th class="p-3 font-bold">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-800/60">
+                <tbody class="divide-y divide-slate-100">
                     @forelse($kunjunganList as $kunjungan)
-                        <tr class="hover:bg-slate-800/20">
-                            <td class="p-3 font-semibold text-blue-400">{{ $kunjungan->nomor }}</td>
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="p-3 font-bold text-[#003399]">{{ $kunjungan->nomor }}</td>
                             <td class="p-3">
-                                <p class="font-medium text-slate-100">{{ $kunjungan->customer->nama_perusahaan ?? '-' }}</p>
-                                <p class="text-[10px] text-slate-400">{{ $kunjungan->lokasi }}</p>
+                                <p class="font-bold text-slate-800">{{ $kunjungan->customer->nama_perusahaan ?? '-' }}</p>
+                                <p class="text-[10px] text-slate-500 font-medium">{{ $kunjungan->lokasi }}</p>
                             </td>
-                            <td class="p-3">
+                            <td class="p-3 font-medium">
                                 {{ $kunjungan->engineer->user->nama ?? 'Belum Ditugaskan' }}
                             </td>
-                            <td class="p-3">
-                                <span class="text-slate-400">{{ $kunjungan->tools->count() }} Alat Terlampir</span>
+                            <td class="p-3 font-medium">
+                                <span class="text-slate-500">{{ $kunjungan->tools->count() }} Alat Terlampir</span>
                             </td>
                             <td class="p-3">
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-medium {{ $kunjungan->status == 'Selesai' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20' }}">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold {{ $kunjungan->status == 'Selesai' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
                                     {{ $kunjungan->status }}
                                 </span>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="p-4 text-center text-slate-500 italic">Belum ada aktivitas kunjungan.</td>
+                            <td colspan="5" class="p-4 text-center text-slate-400 italic">Belum ada aktivitas kunjungan.</td>
                         </tr>
                     @endforelse
                 </tbody>
