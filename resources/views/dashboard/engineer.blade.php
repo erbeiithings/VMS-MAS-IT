@@ -78,9 +78,11 @@
     </div>
 
     <!-- Riwayat Kunjungan Selesai -->
-    <div class="p-5 md:p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
-        <h4 class="text-sm font-bold text-[#002266] mb-4">Riwayat Kunjungan Selesai Terakhir</h4>
-        <div class="space-y-3">
+    <div class="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-5 md:p-6 border-b border-slate-100">
+            <h4 class="text-sm font-bold text-[#002266]">Riwayat Kunjungan Selesai Terakhir</h4>
+        </div>
+        <div class="p-5 md:p-6 space-y-3">
             @forelse($riwayatKunjungan as $history)
                 <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-between text-xs">
                     <div>
@@ -94,6 +96,14 @@
             @empty
                 <p class="text-xs text-slate-400 italic">Belum ada riwayat kunjungan selesai.</p>
             @endforelse
+        </div>
+        
+        <!-- FITUR BARU: Tombol Lihat Semua Kunjungan -->
+        <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-center">
+            <a href="{{ route('kunjungan.index') }}" class="text-xs font-bold text-[#003399] hover:text-[#001233] flex items-center gap-1.5 transition">
+                Lihat Semua Riwayat Kunjungan
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
         </div>
     </div>
 

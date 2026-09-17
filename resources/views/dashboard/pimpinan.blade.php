@@ -42,34 +42,36 @@
     </div>
 
     <!-- Daftar Kunjungan Aktif -->
-    <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
-        <h4 class="text-sm font-bold text-[#002266] mb-4">Daftar Kunjungan Operasional</h4>
+    <div class="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100">
+            <h4 class="text-sm font-bold text-[#002266]">Daftar Kunjungan Operasional</h4>
+        </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs text-slate-600">
                 <thead class="text-[11px] uppercase bg-slate-50 text-slate-500 border-b border-slate-200">
                     <tr>
-                        <th class="p-3 font-bold">Nomor</th>
-                        <th class="p-3 font-bold">Customer & Lokasi</th>
-                        <th class="p-3 font-bold">Engineer Bertugas</th>
-                        <th class="p-3 font-bold">Tools Dibawa</th>
-                        <th class="p-3 font-bold">Status</th>
+                        <th class="p-4 font-bold">Nomor</th>
+                        <th class="p-4 font-bold">Customer & Lokasi</th>
+                        <th class="p-4 font-bold">Engineer Bertugas</th>
+                        <th class="p-4 font-bold">Tools Dibawa</th>
+                        <th class="p-4 font-bold">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($kunjunganList as $kunjungan)
                         <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="p-3 font-bold text-[#003399]">{{ $kunjungan->nomor }}</td>
-                            <td class="p-3">
+                            <td class="p-4 font-bold text-[#003399]">{{ $kunjungan->nomor }}</td>
+                            <td class="p-4">
                                 <p class="font-bold text-slate-800">{{ $kunjungan->customer->nama_perusahaan ?? '-' }}</p>
                                 <p class="text-[10px] text-slate-500 font-medium">{{ $kunjungan->lokasi }}</p>
                             </td>
-                            <td class="p-3 font-medium">
+                            <td class="p-4 font-medium">
                                 {{ $kunjungan->engineer->user->nama ?? 'Belum Ditugaskan' }}
                             </td>
-                            <td class="p-3 font-medium">
+                            <td class="p-4 font-medium">
                                 <span class="text-slate-500">{{ $kunjungan->tools->count() }} Alat Terlampir</span>
                             </td>
-                            <td class="p-3">
+                            <td class="p-4">
                                 <span class="px-2.5 py-1 rounded-full text-[10px] font-bold {{ $kunjungan->status == 'Selesai' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
                                     {{ $kunjungan->status }}
                                 </span>
@@ -77,11 +79,19 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="p-4 text-center text-slate-400 italic">Belum ada aktivitas kunjungan.</td>
+                            <td colspan="5" class="p-6 text-center text-slate-400 italic font-medium">Belum ada aktivitas kunjungan.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
+        </div>
+        
+        <!-- FITUR BARU: Tombol Lihat Semua Kunjungan -->
+        <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-center">
+            <a href="{{ route('kunjungan.index') }}" class="text-xs font-bold text-[#003399] hover:text-[#001233] flex items-center gap-1.5 transition">
+                Lihat Semua Kunjungan
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
         </div>
     </div>
 

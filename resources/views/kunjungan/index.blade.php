@@ -7,12 +7,13 @@
 <div class="space-y-6">
 
     @if(session('success'))
-        <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2 font-medium shadow-sm">
+        <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2 font-bold shadow-sm">
             <svg class="w-5 h-5 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
             <span>{{ session('success') }}</span>
         </div>
     @endif
 
+    <!-- Header Section -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
             <h3 class="text-lg font-bold text-[#002266]">Daftar Kunjungan Engineer</h3>
@@ -25,6 +26,43 @@
                 Buat Jadwal Kunjungan
             </button>
         @endif
+    </div>
+
+    <!-- FITUR BARU: Baris Filter & Pencarian -->
+    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-4 items-end">
+        <form action="{{ route('kunjungan.index') }}" method="GET" class="w-full flex flex-col sm:flex-row gap-4 items-end">
+            <!-- Search -->
+            <div class="flex-1 w-full">
+                <label for="search" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Pencarian Data</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                    <input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="Cari No. Kunjungan, Klien, atau Pekerjaan..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#003399]">
+                </div>
+            </div>
+
+            <!-- Sortir -->
+            <div class="w-full sm:w-48">
+                <label for="sort" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Urutkan</label>
+                <select id="sort" name="sort" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#003399]">
+                    <option value="terbaru" {{ request('sort') == 'terbaru' ? 'selected' : '' }}>Paling Baru (Terbaru)</option>
+                    <option value="terlama" {{ request('sort') == 'terlama' ? 'selected' : '' }}>Paling Lama (Terlama)</option>
+                </select>
+            </div>
+
+            <!-- Tombol Aksi -->
+            <div class="flex gap-2 w-full sm:w-auto">
+                <button type="submit" class="w-full sm:w-auto px-5 py-2 bg-[#002266] hover:bg-[#001233] text-white text-xs font-bold rounded-xl shadow-lg shadow-blue-900/20 transition flex items-center justify-center gap-2">
+                    Terapkan
+                </button>
+                @if(request()->has('search') || request()->has('sort'))
+                    <a href="{{ route('kunjungan.index') }}" class="w-full sm:w-auto px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold rounded-xl transition flex items-center justify-center text-center">
+                        Reset
+                    </a>
+                @endif
+            </div>
+        </form>
     </div>
 
     <!-- Table Card -->
@@ -166,12 +204,13 @@
 
                     @empty
                         <tr>
-                            <td colspan="6" class="p-6 text-center text-slate-400 font-medium italic">Belum ada kunjungan terdaftar.</td>
+                            <td colspan="6" class="p-6 text-center text-slate-400 font-medium italic">Data tidak ditemukan.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+        <!-- Menampilkan Pagination Bawaan Laravel yang sudah otomatis menghandle filter (appends) -->
         <div class="p-4 border-t border-slate-100 bg-slate-50 rounded-b-2xl">
             {{ $kunjunganList->links() }}
         </div>

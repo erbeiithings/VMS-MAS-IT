@@ -13,10 +13,11 @@ use Illuminate\Support\Facades\Auth;
 class LaporanController extends Controller
 {
     // Halaman daftar semua laporan yang sudah selesai / terverifikasi
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
-        $query = Laporan::with(['kunjungan.customer', 'kunjungan.engineer.user', 'buktiPenyelesaian'])->latest();
+        // Mulai query dasar dan panggil relasi yang dibutuhin
+        $query = Laporan::with(['kunjungan.customer', 'kunjungan.engineer.user', 'buktiPenyelesaian']);
 
         // Jika login sebagai Engineer, filter hanya laporannya sendiri
         if ($user->id_role == 3) {
@@ -25,7 +26,30 @@ class LaporanController extends Controller
             });
         }
 
-        $laporanList = $query->paginate(10);
+        // Fitur Pencarian (Cari berdasarkan Nomor Kunjungan, Nama Customer, atau Nama Engineer)
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->whereHas('kunjungan', function($q) use ($search) {
+                $q->where('nomor', 'like', '%' . $search . '%')
+                  ->orWhereHas('customer', function($cq) use ($search) {
+                      $cq->where('nama_perusahaan', 'like', '%' . $search . '%');
+                  })
+                  ->orWhereHas('engineer.user', function($eq) use ($search) {
+                      $eq->where('nama', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+
+        // Fitur Sortir (Terbaru / Terlama)
+        $sort = $request->get('sort', 'terbaru');
+        if ($sort == 'terlama') {
+            $query->oldest('id_laporan'); // Urutkan dari yang pertama kali dibuat
+        } else {
+            $query->latest('id_laporan'); // Urutkan dari yang paling baru
+        }
+
+        // Pagination max 10, jangan lupa appends request biar filter pencarian nggak hilang pas pindah halaman
+        $laporanList = $query->paginate(10)->appends($request->all());
 
         return view('laporan.index', compact('laporanList'));
     }

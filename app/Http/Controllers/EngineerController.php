@@ -10,9 +10,31 @@ use Illuminate\Support\Facades\Hash;
 
 class EngineerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $engineers = Engineer::with('user')->latest()->paginate(10);
+        // Mulai query dasar
+        $query = Engineer::with('user');
+
+        // Fitur Pencarian (Search by Nama atau Username)
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('nama', 'like', '%' . $search . '%')
+                  ->orWhere('username', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Fitur Sortir (Terbaru / Terlama)
+        $sort = $request->get('sort', 'terbaru');
+        if ($sort == 'terlama') {
+            $query->oldest();
+        } else {
+            $query->latest();
+        }
+
+        // Pagination max 10, dan bawa parameter pencarian ke halaman berikutnya
+        $engineers = $query->paginate(10)->appends($request->all());
+        
         return view('master.engineer.index', compact('engineers'));
     }
 

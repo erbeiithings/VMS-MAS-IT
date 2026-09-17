@@ -27,6 +27,43 @@
         </div>
     </div>
 
+    <!-- FITUR BARU: Baris Filter & Pencarian -->
+    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-4 items-end">
+        <form action="{{ route('laporan.index') }}" method="GET" class="w-full flex flex-col sm:flex-row gap-4 items-end">
+            <!-- Search -->
+            <div class="flex-1 w-full">
+                <label for="search" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Pencarian Data</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                    <input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="Cari No. Kunjungan, Nama Klien, atau Engineer..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#003399]">
+                </div>
+            </div>
+
+            <!-- Sortir -->
+            <div class="w-full sm:w-48">
+                <label for="sort" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Urutkan</label>
+                <select id="sort" name="sort" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#003399]">
+                    <option value="terbaru" {{ request('sort') == 'terbaru' ? 'selected' : '' }}>Paling Baru (Terbaru)</option>
+                    <option value="terlama" {{ request('sort') == 'terlama' ? 'selected' : '' }}>Paling Lama (Terlama)</option>
+                </select>
+            </div>
+
+            <!-- Tombol Aksi -->
+            <div class="flex gap-2 w-full sm:w-auto">
+                <button type="submit" class="w-full sm:w-auto px-5 py-2 bg-[#002266] hover:bg-[#001233] text-white text-xs font-bold rounded-xl shadow-lg shadow-blue-900/20 transition flex items-center justify-center gap-2">
+                    Terapkan
+                </button>
+                @if(request()->has('search') || request()->has('sort'))
+                    <a href="{{ route('laporan.index') }}" class="w-full sm:w-auto px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold rounded-xl transition flex items-center justify-center text-center">
+                        Reset
+                    </a>
+                @endif
+            </div>
+        </form>
+    </div>
+
     <!-- Table Card -->
     <div class="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm">
         <div class="overflow-x-auto">

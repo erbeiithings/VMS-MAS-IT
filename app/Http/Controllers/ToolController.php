@@ -7,9 +7,28 @@ use Illuminate\Http\Request;
 
 class ToolController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $tools = Tool::latest()->paginate(10);
+        $query = Tool::query();
+
+        // Fitur Pencarian (Search by Nama Alat, Kode, atau Kategori)
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where('nama_alat', 'like', '%' . $search . '%')
+                  ->orWhere('kode', 'like', '%' . $search . '%')
+                  ->orWhere('kategori', 'like', '%' . $search . '%');
+        }
+
+        // Fitur Sortir
+        $sort = $request->get('sort', 'terbaru');
+        if ($sort == 'terlama') {
+            $query->oldest();
+        } else {
+            $query->latest();
+        }
+
+        $tools = $query->paginate(10)->appends($request->all());
+        
         return view('master.tool.index', compact('tools'));
     }
 

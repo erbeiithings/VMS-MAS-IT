@@ -18,10 +18,10 @@ use Illuminate\Support\Facades\DB;
 class KunjunganController extends Controller
 {
     // 1. Tampilkan List Kunjungan
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
-        $query = Kunjungan::with(['customer', 'engineer.user', 'tools', 'supportEngineers.user'])->latest();
+        $query = Kunjungan::with(['customer', 'engineer.user', 'tools', 'supportEngineers.user']);
 
         // Jika engineer, filter hanya kunjungan miliknya
         if ($user->id_role == 3) {
@@ -31,7 +31,30 @@ class KunjunganController extends Controller
             }
         }
 
-        $kunjunganList = $query->paginate(10);
+        // Fitur Pencarian (Cari Nomor Kunjungan, Pekerjaan, atau Nama Perusahaan)
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nomor', 'like', '%' . $search . '%')
+                  ->orWhere('pekerjaan', 'like', '%' . $search . '%')
+                  ->orWhereHas('customer', function($cq) use ($search) {
+                      $cq->where('nama_perusahaan', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+
+        // Fitur Sortir
+        $sort = $request->get('sort', 'terbaru');
+        if ($sort == 'terlama') {
+            $query->oldest();
+        } else {
+            $query->latest();
+        }
+
+        // Eksekusi pagination
+        $kunjunganList = $query->paginate(10)->appends($request->all());
+        
+        // Data pendukung buat modal tambah
         $customers = Customer::all();
         $engineers = Engineer::with('user')->where('status_ketersediaan', 'Tersedia')->get();
         $tools = Tool::where('status_ketersediaan', 'Tersedia')->get();
