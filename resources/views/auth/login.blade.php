@@ -63,9 +63,18 @@
             <div>
                 <label for="password" class="block text-xs font-semibold text-slate-700 mb-1.5">Password</label>
                 <div class="relative">
+                    <!-- Tambah pr-12 disini biar teks ga nabrak icon -->
                     <input type="password" id="password" name="password" required
-                           class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#003399] focus:border-transparent transition-all"
+                           class="w-full px-4 py-2.5 pr-12 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#003399] focus:border-transparent transition-all"
                            placeholder="••••••••">
+                    
+                    <!-- Tombol Icon Mata -->
+                    <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-[#003399] transition-colors">
+                        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </button>
                 </div>
             </div>
 
@@ -82,5 +91,27 @@
             </button>
         </form>
     </div>
+
+    <!-- Script Native JS untuk Toggle Password -->
+    <script>
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+        const eyeIcon = document.querySelector('#eyeIcon');
+
+        togglePassword.addEventListener('click', function (e) {
+            // Cek tipe inputan saat ini
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            
+            // Ubah warna icon jadi biru pas password kelihatan (opsional biar UX makin mantap)
+            if (type === 'text') {
+                eyeIcon.classList.add('text-[#003399]');
+                eyeIcon.classList.remove('text-slate-400');
+            } else {
+                eyeIcon.classList.add('text-slate-400');
+                eyeIcon.classList.remove('text-[#003399]');
+            }
+        });
+    </script>
 </body>
 </html>
