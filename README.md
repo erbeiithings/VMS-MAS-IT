@@ -1,85 +1,129 @@
-# 🏢 MAS-IT VMS (Visit Management System)
+🏢 MAS-IT VMS (Visit Management System)
 
-**MAS-IT VMS** adalah sebuah Sistem Informasi berbasis web yang dirancang khusus untuk mengelola, mencatat, dan memonitor data kunjungan (*visit*) serta aktivitas pekerjaan lapangan. Sistem ini memudahkan perusahaan dalam melacak jadwal kunjungan Engineer, mengelola laporan hasil pekerjaan, serta memfasilitasi persetujuan dari tingkat Kepala hingga Pimpinan.
+MAS-IT VMS adalah Sistem Informasi berbasis web yang dirancang untuk mengelola, mencatat, dan memonitor data kunjungan (visit) serta aktivitas pekerjaan lapangan engineer. Sistem ini memudahkan lacak jadwal kunjungan, pelaporan hasil pekerjaan secara digital, dan proses persetujuan oleh tingkat Kepala maupun Pimpinan.
 
-## ✨ Fitur Utama
-*   **Multi-Role Access:** Sistem otentikasi aman dengan pembagian hak akses pengguna (Pimpinan, Kepala, dan Engineer).
-*   **Manajemen Kunjungan:** Pencatatan dan penjadwalan aktivitas kunjungan Engineer ke lokasi klien/pekerjaan.
-*   **Pelaporan Pekerjaan:** Pengisian hasil pekerjaan lapangan secara digital.
-*   **Monitoring & Evaluasi:** Dasbor untuk memantau status kunjungan dan riwayat pekerjaan oleh atasan.
-*   **User Management:** Pengelolaan data akun dan status keaktifan pengguna (Aktif/Nonaktif).
+✨ Fitur Utama
 
-## 💻 Tech Stack
-*   **Framework:** Laravel 10
-*   **Bahasa Pemrograman:** PHP (Minimal v8.1)
-*   **Database:** MySQL
-*   **Server Lokal:** XAMPP / Laragon
+Multi-Role Access & Authentication: Hak akses terpisah dengan proteksi sesi untuk Kepala Pimpinan, Pimpinan, dan Engineer.
 
----
+Manajemen & Penjadwalan Kunjungan: Pencatatan jadwal tugas lapangan, penugasan Lead/Support Engineer, dan tracking status kunjungan.
 
-## 🛠️ Persyaratan Sistem (Prerequisites)
-Sebelum menjalankan *project* ini di laptop kamu, pastikan sudah menginstal perangkat lunak berikut:
-1.  **XAMPP** (Pastikan menggunakan PHP minimal versi 8.1)
-2.  **Composer** (Untuk mengelola *dependency* Laravel)
-3.  **Git** (Untuk melakukan *clone repository*)
+Presensi & Geolocation: Validasi titik lokasi (GPS) untuk proses check-in dan check-out kunjungan lapangan.
 
----
+Pelaporan & Ekspor PDF: Pengisian aktivitas pekerjaan, upload bukti fisik/dokumentasi, serta cetak laporan PDF (Barryvdh DomPDF).
 
-## 🚀 Cara Instalasi (Panduan untuk Tester)
+Monitoring & Dashboard Analytics: Visualisasi KPI, distribusi status kunjungan, dan riwayat pekerjaan secara real-time.
 
-Ikuti langkah-langkah di bawah ini secara berurutan untuk menjalankan aplikasi di komputer lokal (*Localhost*).
+User Management: Pengelolaan akun pengguna beserta kontrol status keaktifan (Aktif/Nonaktif).
+
+💻 Tech Stack
+
+Framework: Laravel 10
+
+Bahasa Pemrograman: PHP (Minimal v8.1)
+
+Database: MySQL
+
+Styling & UI: Tailwind CSS (via CDN) & Custom Components
+
+Pustaka Utama: barryvdh/laravel-dompdf (Generasi Laporan PDF)
+
+🛠️ Persyaratan Sistem (Prerequisites)
+
+Sebelum menjalankan project ini secara lokal, pastikan perangkat kamu sudah terinstal:
+
+PHP: Versi >= 8.1
+
+Composer: Untuk manajemen dependency PHP
+
+MySQL Database Server: (via XAMPP, Laragon, atau MySQL Standalone)
+
+Git: Untuk clone repository
+
+🚀 Panduan Instalasi Lokal (Local Setup)
+
+Ikuti langkah-langkah berikut secara berurutan untuk menjalankan aplikasi di lingkungan development:
 
 1. Clone Repository
-Buka Terminal atau Command Prompt, arahkan ke folder tempat kamu ingin menyimpan *project* (misal: `C:\xampp\htdocs` atau folder `Documents`). Jalankan perintah:
-```bash
-git clone [https://github.com/erbeiithings/VMS-MAS-IT.git](https://github.com/erbeiithings/VMS-MAS-IT.git)
-cd vms-mas-it
+
+Buka terminal atau Command Prompt, lalu jalankan:
+
+git clone https://github.com/erbeiithings/VMS-MAS-IT.git
+cd VMS-MAS-IT
+
 
 2. Install Dependencies
-Karena folder vendor diabaikan oleh Git, kamu wajib mengunduh pustaka sistemnya terlebih dahulu dengan menjalankan perintah ini:
 
-Bash
+Unduh semua pustaka backend yang dibutuhkan menggunakan Composer:
+
 composer install
+
+
+> Note: Aplikasi ini menggunakan Tailwind CSS via CDN, sehingga tidak membutuhkan build process Node.js (npm install / npm run dev).
+
 3. Konfigurasi Environment (.env)
-Aplikasi butuh file .env untuk pengaturan database dan kunci keamanan.
 
-Salin file .env.example dan ubah namanya menjadi .env. Bisa dilakukan manual atau jalankan perintah:
+Salin file .env.example menjadi .env:
 
-Bash
 cp .env.example .env
-Buat kunci keamanan aplikasi (Application Key) dengan perintah:
 
-Bash
+
+Generate Application Key:
+
 php artisan key:generate
+
+
 4. Setup Database
-Buka aplikasi XAMPP Control Panel lalu klik Start pada Apache dan MySQL.
 
-Buka browser dan akses http://localhost/phpmyadmin.
+Nyalakan Service Apache dan MySQL di Control Panel (XAMPP/Laragon).
 
-Buat database baru (kosong) dengan nama: vms_masit.
+Buka phpMyAdmin (http://localhost/phpmyadmin) dan buat database baru bernama:
+vms_masit
 
-Buka file .env di VS Code, lalu pastikan pengaturan blok databasenya persis seperti ini:
+Sesuaikan konfigurasi database pada file .env kamu:
 
-Cuplikan kode
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=vms_masit
 DB_USERNAME=root
 DB_PASSWORD=
-5. Jalankan Migrasi dan Seeding
-Langkah ini akan membuat tabel-tabel di database secara otomatis beserta data bawaannya (akun tester). Jalankan perintah:
 
-Bash
+
+5. Migrasi & Seeding Database
+
+Jalankan perintah ini untuk membuat struktur tabel dan mengisi data awal (dummy/account testing):
+
 php artisan migrate:fresh --seed
-6. Link Storage (Opsional tapi Penting)
-Jika aplikasi menggunakan fitur upload gambar/dokumen, pastikan menghubungkan folder storage ke publik:
 
-Bash
+
+6. Link Storage Asset
+
+Hubungkan direktori storage privat ke folder public agar file/foto dokumentasi yang diunggah dapat diakses di browser:
+
 php artisan storage:link
-7. Jalankan Server Aplikasi
-Langkah terakhir, nyalakan server lokal bawaan Laravel:
 
-Bash
+
+7. Jalankan Local Development Server
+
+Jalankan server lokal bawaan Laravel:
+
 php artisan serve
-Buka browser dan akses alamat webnya di: http://127.0.0.1:8000
+
+
+Akses aplikasi melalui browser di alamat: http://127.0.0.1:8000
+
+📱 Pengujian Fitur GPS di Perangkat HP (Jaringan Lokal)
+
+Jika pengujian dilakukan melalui perangkat HP dalam satu jaringan WiFi:
+
+Jalankan server dengan menyertakan host IP:
+
+php artisan serve --host=0.0.0.0 --port=8000
+
+
+Cek IP lokal laptop kamu (via ipconfig di CMD).
+
+Akses via browser HP menggunakan alamat http://<IP_LAPTOP>:8000.
+
+Jika browser HP memblokir fitur lokasi/GPS karena koneksi HTTP, aktifkan flag "Insecure origins treated as secure" pada chrome://flags atau brave://flags untuk URL IP lokal kamu.
