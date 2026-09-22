@@ -13,6 +13,12 @@
         body {
             font-family: 'Poppins', sans-serif;
         }
+
+        /* Menyembunyikan icon mata bawaan browser Edge / Windows */
+        input::-ms-reveal,
+        input::-ms-clear {
+            display: none;
+        }
     </style>
 </head>
 <!-- Background Body diubah jadi Full Gradasi Biru MAS-IT -->
