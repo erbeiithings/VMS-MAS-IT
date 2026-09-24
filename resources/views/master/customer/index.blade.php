@@ -26,7 +26,7 @@
         </button>
     </div>
 
-    <!-- FITUR BARU: Baris Filter & Pencarian -->
+    <!-- Baris Filter & Pencarian -->
     <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-4 items-end">
         <form action="{{ route('master.customer.index') }}" method="GET" class="w-full flex flex-col sm:flex-row gap-4 items-end">
             <!-- Search -->
@@ -88,16 +88,27 @@
                             <td class="p-4 font-medium">
                                 <p class="text-slate-700 max-w-xs truncate">{{ $c->alamat }}</p>
                                 @if($c->latitude && $c->longitude)
-                                    <p class="text-[10px] font-bold text-emerald-600 mt-1">GPS: {{ $c->latitude }}, {{ $c->longitude }}</p>
+                                    <p class="text-[10px] font-bold text-emerald-600 mt-1">GPS: {{ $c->latitude }}, {{ $c->longitude }}
                                 @else
                                     <p class="text-[10px] font-bold text-rose-500 mt-1">GPS: Belum diatur</p>
                                 @endif
                             </td>
                             <td class="p-4 text-center">
                                 <div class="inline-flex items-center gap-2">
+                                    <!-- TOMBOL BARU: Kelola Cabang -->
+                                    <button onclick="openCabangModal({{ $c->id_customer }}, '{{ addslashes($c->nama_perusahaan) }}')" 
+                                            class="p-1.5 bg-blue-50 border border-blue-100 hover:bg-blue-600 text-blue-600 hover:text-white rounded-lg transition shadow-sm" title="Kelola Cabang/Site">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                        </svg>
+                                    </button>
+
+                                    <!-- Tombol Edit (Bawaan) -->
                                     <button onclick="openEditModal({{ json_encode($c) }})" class="p-1.5 bg-amber-50 border border-amber-100 hover:bg-amber-500 text-amber-600 hover:text-white rounded-lg transition shadow-sm" title="Edit">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     </button>
+                                    
+                                    <!-- Tombol Delete -->
                                     <form action="{{ route('master.customer.destroy', $c->id_customer) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
@@ -223,11 +234,71 @@
     </div>
 </div>
 
+<!-- Modal Kelola Cabang -->
+<div id="modalKelolaCabang" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-4xl p-6 shadow-2xl flex flex-col max-h-[90vh]">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-4">
+            <h4 class="text-base font-bold text-[#002266]">Kelola Cabang: <span id="namaPerusahaanCabang" class="text-blue-600"></span></h4>
+            <button onclick="document.getElementById('modalKelolaCabang').classList.add('hidden')" class="text-slate-400 hover:text-rose-500 transition text-lg">&times;</button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 overflow-y-auto pr-2">
+            <!-- Form Tambah Cabang -->
+            <div class="md:col-span-1 bg-slate-50 p-4 rounded-xl border border-slate-200 h-fit">
+                <h5 class="font-bold text-slate-700 text-xs mb-3 uppercase tracking-wider">Tambah Cabang</h5>
+                <form id="formTambahCabang" method="POST" class="space-y-3 text-xs font-medium">
+                    @csrf
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1.5">Nama Cabang</label>
+                        <input type="text" name="nama_cabang" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1.5">Alamat Lengkap</label>
+                        <textarea name="alamat_lengkap" rows="2" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1.5">Titik GPS (Optional)</label>
+                        <div class="flex gap-1 mb-2">
+                            <input type="text" id="site_latitude" name="latitude" placeholder="Latitude" class="w-full px-2 py-2 bg-white border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]">
+                            <input type="text" id="site_longitude" name="longitude" placeholder="Longitude" class="w-full px-2 py-2 bg-white border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]">
+                        </div>
+                        <button type="button" onclick="getLocation('site_latitude', 'site_longitude')" class="w-full px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-md transition text-[10px] font-bold">
+                            📍 Auto GPS
+                        </button>
+                    </div>
+                    <button type="submit" class="w-full px-4 py-2.5 bg-[#002266] hover:bg-[#001233] text-white font-bold rounded-xl shadow-lg transition mt-2">Simpan Cabang</button>
+                </form>
+            </div>
+
+            <!-- List Data Cabang -->
+            <div class="md:col-span-2">
+                <h5 class="font-bold text-slate-700 text-xs mb-3 uppercase tracking-wider">Daftar Cabang Aktif</h5>
+                <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                    <table class="w-full text-left text-xs text-slate-600">
+                        <thead class="text-[10px] uppercase bg-slate-100 text-slate-500 border-b border-slate-200">
+                            <tr>
+                                <th class="p-3 font-bold">Nama Cabang</th>
+                                <th class="p-3 font-bold">Detail Lokasi</th>
+                                <th class="p-3 text-center font-bold">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody_cabang" class="divide-y divide-slate-100 bg-white">
+                            <!-- Diisi via AJAX -->
+                            <tr><td colspan="3" class="p-4 text-center text-slate-400 italic">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- MODAL INFO KHUSUS NOTIFIKASI GPS -->
 <div id="modalInfoGPS" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
     <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-xs p-6 shadow-2xl text-center transition-all">
         <div id="modalInfoIcon" class="mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-4">
-            <!-- Ikon akan disuntik dari JS -->
+            <!-- Ikon disuntik dari JS -->
         </div>
         <h3 id="modalInfoTitle" class="text-base font-bold text-[#002266] mb-2"></h3>
         <p id="modalInfoMessage" class="text-xs text-slate-600 mb-6 font-medium leading-relaxed"></p>
@@ -284,6 +355,54 @@
         document.getElementById('edit_longitude').value = customer.longitude || '';
         
         document.getElementById('modalEditCustomer').classList.remove('hidden');
+    }
+
+    function openCabangModal(idCustomer, namaPerusahaan) {
+        document.getElementById('namaPerusahaanCabang').innerText = namaPerusahaan;
+        document.getElementById('formTambahCabang').action = `/master/customer/${idCustomer}/site`;
+        document.getElementById('modalKelolaCabang').classList.remove('hidden');
+        
+        const tbody = document.getElementById('tbody_cabang');
+        tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-400 italic">Memuat data cabang...</td></tr>';
+        
+        fetch(`/kunjungan/get-sites/${idCustomer}`)
+            .then(res => res.json())
+            .then(data => {
+                tbody.innerHTML = '';
+                if(data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="p-6 text-center text-slate-400 font-medium italic">Belum ada data cabang / site.</td></tr>';
+                } else {
+                    data.forEach(site => {
+                        let gpsText = (site.latitude && site.longitude) 
+                            ? `<p class="text-[10px] font-bold text-emerald-600 mt-1">GPS: ${site.latitude}, ${site.longitude}</p>` 
+                            : `<p class="text-[10px] font-bold text-rose-500 mt-1">GPS: Belum diatur</p>`;
+                            
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-[#003399]">${site.nama_cabang}</td>
+                                <td class="p-3 font-medium">
+                                    <p class="text-slate-700">${site.alamat_lengkap}</p>
+                                    ${gpsText}
+                                </td>
+                                <td class="p-3 text-center">
+                                    <form action="/master/customer/site/${site.id_site}" method="POST" class="inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <button type="button" onclick="showConfirmModal(this.form, 'Hapus Cabang', 'Yakin menghapus cabang ${site.nama_cabang}?')" 
+                                                class="p-1.5 bg-rose-50 border border-rose-100 hover:bg-rose-600 text-rose-600 hover:text-white rounded-lg transition shadow-sm" title="Hapus">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-rose-500 font-bold">Gagal menarik data cabang.</td></tr>';
+            });
     }
 </script>
 @endsection

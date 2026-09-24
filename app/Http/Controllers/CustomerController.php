@@ -88,4 +88,13 @@ class CustomerController extends Controller
         // Refresh halaman bawa pesan sukses
         return redirect()->back()->with('success', 'Customer berhasil dihapus!');
     }
+
+    // =====================================================================
+    // TAMBAHAN BARU: AJAX Get Sites berdasarkan ID Customer
+    // =====================================================================
+    public function getSites($id)
+    {
+        $sites = \App\Models\CustomerSite::where('id_customer', $id)->get();
+        return response()->json($sites);
+    }
 }

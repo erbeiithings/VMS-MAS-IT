@@ -28,7 +28,7 @@
         @endif
     </div>
 
-    <!-- FITUR BARU: Baris Filter & Pencarian -->
+    <!-- Baris Filter & Pencarian -->
     <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-4 items-end">
         <form action="{{ route('kunjungan.index') }}" method="GET" class="w-full flex flex-col sm:flex-row gap-4 items-end">
             <!-- Search -->
@@ -84,11 +84,17 @@
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="p-4 align-top">
                                 <span class="font-mono text-[#003399] font-bold">{{ $k->nomor }}</span>
-                                <p class="text-[10px] text-slate-500 mt-0.5 font-medium">{{ $k->tanggal }} ({{ $k->waktu }})</p>
+                                <p class="text-[10px] text-slate-500 mt-0.5 font-medium">{{ $k->tanggal }} ({{$k->waktu }})</p>
                             </td>
                             <td class="p-4 align-top">
                                 <p class="font-bold text-slate-800">{{ $k->customer->nama_perusahaan ?? '-' }}</p>
-                                <p class="text-[10px] text-slate-500 truncate max-w-xs mt-0.5">{{ $k->lokasi }}</p>
+                                <!-- Indikator Cabang (Jika Ada) -->
+                                @if(isset($k->site) &&$k->site)
+                                    <span class="inline-block px-1.5 py-0.5 bg-blue-100 text-[#003399] text-[9px] font-bold rounded mt-1 border border-blue-200">
+                                        📍 Cabang: {{ $k->site->nama_cabang }}
+                                    </span>
+                                @endif
+                                <p class="text-[10px] text-slate-500 truncate max-w-xs mt-0.5" title="{{ $k->lokasi }}">{{ $k->lokasi }}</p>
                             </td>
                             <td class="p-4 font-medium text-slate-700 align-top">{{ $k->pekerjaan }}</td>
                             <td class="p-4 align-top">
@@ -136,10 +142,18 @@
                                     @method('PUT')
                                     <div>
                                         <label class="block text-slate-700 font-semibold mb-1.5">Customer / Klien</label>
-                                        <select name="id_customer" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]">
+                                        <select name="id_customer" data-target-site="id_site_edit_{{ $k->id_kunjungan }}" required class="customer-select-edit w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]">
                                             @foreach($customers as $c)
                                                 <option value="{{ $c->id_customer }}" {{ $k->id_customer == $c->id_customer ? 'selected' : '' }}>{{ $c->nama_perusahaan }}</option>
                                             @endforeach
+                                        </select>
+                                    </div>
+                                    <!-- FITUR BARU: Dropdown Cabang -->
+                                    <div>
+                                        <label class="block text-slate-700 font-semibold mb-1.5">Cabang / Lokasi Site</label>
+                                        <select name="id_site" id="id_site_edit_{{ $k->id_kunjungan }}" data-selected="{{ $k->id_site ?? '' }}" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]">
+                                            <option value="">Pusat / Tanpa Cabang</option>
+                                            <!-- Pilihan terisi otomatis oleh AJAX -->
                                         </select>
                                     </div>
                                     <div>
@@ -154,10 +168,10 @@
                                     <div>
                                         <label class="block text-slate-700 font-semibold mb-1.5">Tim Support (Maks. 4 Orang)</label>
                                         <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 max-h-32 overflow-y-auto">
-                                            @php $selectedSupport = $k->supportEngineers->pluck('id_engineer')->toArray(); @endphp
+                                            @php $selectedSupport =$k->supportEngineers->pluck('id_engineer')->toArray(); @endphp
                                             @foreach($engineers as $e)
                                                 <label class="flex items-center gap-2 cursor-pointer text-slate-700 font-medium">
-                                                    <input type="checkbox" name="support_engineers[]" value="{{ $e->id_engineer }}" {{ in_array($e->id_engineer, $selectedSupport) ? 'checked' : '' }} class="rounded border-slate-300 text-[#003399] focus:ring-[#003399]">
+                                                    <input type="checkbox" name="support_engineers[]" value="{{ $e->id_engineer }}" {{ in_array($e->id_engineer,$selectedSupport) ? 'checked' : '' }} class="rounded border-slate-300 text-[#003399] focus:ring-[#003399]">
                                                     <span class="text-[11px] truncate">{{ $e->user->nama ?? '-' }}</span>
                                                 </label>
                                             @endforeach
@@ -178,16 +192,16 @@
                                         <input type="text" name="pekerjaan" value="{{ $k->pekerjaan }}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]">
                                     </div>
                                     <div>
-                                        <label class="block text-slate-700 font-semibold mb-1.5">Lokasi Kunjungan</label>
+                                        <label class="block text-slate-700 font-semibold mb-1.5">Alamat / Patokan Kunjungan</label>
                                         <textarea name="lokasi" rows="2" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]">{{ $k->lokasi }}</textarea>
                                     </div>
                                     <div>
                                         <label class="block text-slate-700 font-semibold mb-1.5">Tools & Alat yang Dibawa</label>
                                         <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 max-h-32 overflow-y-auto">
-                                            @php $selectedTools = $k->tools->pluck('id_tool')->toArray(); @endphp
+                                            @php $selectedTools =$k->tools->pluck('id_tool')->toArray(); @endphp
                                             @foreach($tools as $t)
                                                 <label class="flex items-center gap-2 cursor-pointer text-slate-700 font-medium">
-                                                    <input type="checkbox" name="tools[]" value="{{ $t->id_tool }}" {{ in_array($t->id_tool, $selectedTools) ? 'checked' : '' }} class="rounded border-slate-300 text-[#003399] focus:ring-[#003399]">
+                                                    <input type="checkbox" name="tools[]" value="{{ $t->id_tool }}" {{ in_array($t->id_tool,$selectedTools) ? 'checked' : '' }} class="rounded border-slate-300 text-[#003399] focus:ring-[#003399]">
                                                     <span class="text-[11px] truncate">{{ $t->nama_alat }}</span>
                                                 </label>
                                             @endforeach
@@ -210,7 +224,7 @@
                 </tbody>
             </table>
         </div>
-        <!-- Menampilkan Pagination Bawaan Laravel yang sudah otomatis menghandle filter (appends) -->
+        <!-- Menampilkan Pagination -->
         <div class="p-4 border-t border-slate-100 bg-slate-50 rounded-b-2xl">
             {{ $kunjunganList->links() }}
         </div>
@@ -230,11 +244,18 @@
             @csrf
             <div>
                 <label class="block text-slate-700 font-semibold mb-1.5">Customer / Klien</label>
-                <select name="id_customer" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]">
+                <select name="id_customer" id="id_customer_add" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]">
                     <option value="">Pilih Customer</option>
                     @foreach($customers as $c)
-                        <option value="{{ $c->id_customer }}">{{ $c->nama_perusahaan }} ({{ $c->pic }})</option>
+                        <option value="{{ $c->id_customer }}">{{ $c->nama_perusahaan }} ({{$c->pic }})</option>
                     @endforeach
+                </select>
+            </div>
+            <!-- FITUR BARU: Dropdown Cabang -->
+            <div>
+                <label class="block text-slate-700 font-semibold mb-1.5">Cabang / Lokasi Site</label>
+                <select name="id_site" id="id_site_add" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]" disabled>
+                    <option value="">Pilih Customer Terlebih Dahulu</option>
                 </select>
             </div>
             <div>
@@ -272,8 +293,8 @@
                 <input type="text" name="pekerjaan" placeholder="Misal: Instalasi Router Core & Switch" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]">
             </div>
             <div>
-                <label class="block text-slate-700 font-semibold mb-1.5">Lokasi Kunjungan</label>
-                <textarea name="lokasi" rows="2" placeholder="Alamat lengkap / gedung tempat pekerjaan" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]"></textarea>
+                <label class="block text-slate-700 font-semibold mb-1.5">Alamat / Patokan Kunjungan</label>
+                <textarea name="lokasi" rows="2" placeholder="Detail area gedung / lantai..." required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]"></textarea>
             </div>
             <div>
                 <label class="block text-slate-700 font-semibold mb-1.5">Tools & Alat yang Dibawa</label>
@@ -297,6 +318,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // --- LOGIC ENGINEER & SUPPORT (Kode Asli) ---
         const leadSelectAdd = document.querySelector('#modalTambahKunjungan select[name="id_engineer"]');
         const supportCheckboxesAdd = document.querySelectorAll('#modalTambahKunjungan input[name="support_engineers[]"]');
         
@@ -345,6 +367,54 @@
                     });
                 });
             }
+        });
+
+        // --- SCRIPT AJAX FETCH CABANG/SITE (FITUR BARU) ---
+        const loadSitesAjax = (idCustomer, siteSelectElement, selectedSiteId = null) => {
+            siteSelectElement.innerHTML = '<option value="">Memuat data...</option>';
+            siteSelectElement.disabled = true;
+
+            if(!idCustomer) {
+                siteSelectElement.innerHTML = '<option value="">Pilih Customer Terlebih Dahulu</option>';
+                return;
+            }
+
+            fetch(`/kunjungan/get-sites/${idCustomer}`)
+                .then(res => res.json())
+                .then(data => {
+                    siteSelectElement.disabled = false;
+                    siteSelectElement.innerHTML = '<option value="">Pusat / Tanpa Cabang</option>';
+                    data.forEach(site => {
+                        let isSelected = (selectedSiteId == site.id_site) ? 'selected' : '';
+                        siteSelectElement.innerHTML += `<option value="${site.id_site}" ${isSelected}>${site.nama_cabang}</option>`;
+                    });
+                })
+                .catch(err => {
+                    console.error(err);
+                    siteSelectElement.innerHTML = '<option value="">Gagal memuat cabang</option>';
+                });
+        };
+
+        // Trigger AJAX untuk Modal Tambah Kunjungan
+        const customerAdd = document.getElementById('id_customer_add');
+        const siteAdd = document.getElementById('id_site_add');
+        if(customerAdd && siteAdd) {
+            customerAdd.addEventListener('change', (e) => loadSitesAjax(e.target.value, siteAdd));
+        }
+
+        // Trigger AJAX untuk SEMUA Modal Edit Kunjungan
+        document.querySelectorAll('.customer-select-edit').forEach(select => {
+            const siteSelectId = select.getAttribute('data-target-site');
+            const siteSelectElement = document.getElementById(siteSelectId);
+            const preSelectedSite = siteSelectElement.getAttribute('data-selected');
+            
+            // Render cabang awal (saat halaman dimuat pertama kali)
+            if(select.value) {
+                loadSitesAjax(select.value, siteSelectElement, preSelectedSite);
+            }
+
+            // Render cabang ulang jika customer diganti di tengah edit
+            select.addEventListener('change', (e) => loadSitesAjax(e.target.value, siteSelectElement));
         });
     });
 </script>

@@ -14,4 +14,9 @@ class Customer extends Model
     {
         return $this->hasMany(Kunjungan::class, 'id_customer', 'id_customer');
     }
+
+    public function sites()
+{
+    return $this->hasMany(CustomerSite::class, 'id_customer', 'id_customer');
+}
 }

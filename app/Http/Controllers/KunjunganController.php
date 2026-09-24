@@ -11,6 +11,7 @@ use App\Models\Dokumentasi;
 use App\Models\Laporan;
 use App\Models\BuktiPenyelesaian;
 use App\Models\Pengeluaran;
+use App\Models\CustomerSite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +22,8 @@ class KunjunganController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $query = Kunjungan::with(['customer', 'engineer.user', 'tools', 'supportEngineers.user']);
+        // OPTIMASI: Tambahkan 'site' di eager loading
+        $query = Kunjungan::with(['customer', 'site', 'engineer.user', 'tools', 'supportEngineers.user']);
 
         // Jika engineer, filter hanya kunjungan miliknya
         if ($user->id_role == 3) {
@@ -31,7 +33,7 @@ class KunjunganController extends Controller
             }
         }
 
-        // Fitur Pencarian (Cari Nomor Kunjungan, Pekerjaan, atau Nama Perusahaan)
+        // Fitur Pencarian
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -51,10 +53,8 @@ class KunjunganController extends Controller
             $query->latest();
         }
 
-        // Eksekusi pagination
         $kunjunganList = $query->paginate(10)->appends($request->all());
         
-        // Data pendukung buat modal tambah
         $customers = Customer::all();
         $engineers = Engineer::with('user')->where('status_ketersediaan', 'Tersedia')->get();
         $tools = Tool::where('status_ketersediaan', 'Tersedia')->get();
@@ -62,11 +62,12 @@ class KunjunganController extends Controller
         return view('kunjungan.index', compact('kunjunganList', 'customers', 'engineers', 'tools'));
     }
 
-    // 2. Buat Kunjungan Baru (Pimpinan)
+    // 2. Buat Kunjungan Baru
     public function store(Request $request)
     {
         $request->validate([
             'id_customer' => 'required|exists:customers,id_customer',
+            'id_site' => 'nullable|exists:customer_sites,id_site',
             'id_engineer' => 'nullable|exists:engineers,id_engineer',
             'tanggal' => 'required|date',
             'waktu' => 'required',
@@ -74,7 +75,7 @@ class KunjunganController extends Controller
             'pekerjaan' => 'required|string|max:150',
             'tools' => 'nullable|array',
             'tools.*' => 'exists:tools,id_tool',
-            'support_engineers' => 'nullable|array|max:4', // Maksimal 4 support
+            'support_engineers' => 'nullable|array|max:4',
             'support_engineers.*' => 'exists:engineers,id_engineer',
         ]);
 
@@ -84,6 +85,7 @@ class KunjunganController extends Controller
             $kunjungan = Kunjungan::create([
                 'nomor' => $nomorKunjungan,
                 'id_customer' => $request->id_customer,
+                'id_site' => $request->id_site,
                 'id_engineer' => $request->id_engineer,
                 'tanggal' => $request->tanggal,
                 'waktu' => $request->waktu,
@@ -98,7 +100,6 @@ class KunjunganController extends Controller
                 }
             }
 
-            // Simpan tim support
             if ($request->filled('support_engineers')) {
                 $kunjungan->supportEngineers()->attach($request->support_engineers);
             }
@@ -107,15 +108,14 @@ class KunjunganController extends Controller
         return redirect()->back()->with('success', 'Jadwal Kunjungan berhasil dibuat!');
     }
 
-    // =====================================================================
-    // TAMBAHAN BARU: Update Kunjungan (Edit)
-    // =====================================================================
+    // 3. Update Kunjungan
     public function update(Request $request, $id)
     {
         $kunjungan = Kunjungan::findOrFail($id);
 
         $request->validate([
             'id_customer' => 'required|exists:customers,id_customer',
+            'id_site' => 'nullable|exists:customer_sites,id_site',
             'id_engineer' => 'nullable|exists:engineers,id_engineer',
             'tanggal' => 'required|date',
             'waktu' => 'required',
@@ -128,12 +128,12 @@ class KunjunganController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $kunjungan) {
-            // Jika sebelumnya di-reschedule, kembalikan ke Terjadwal setelah diedit
             $statusBaru = $kunjungan->status == 'Reschedule' ? 'Terjadwal' : $kunjungan->status;
             $alasan = $kunjungan->status == 'Reschedule' ? null : $kunjungan->alasan_reschedule;
 
             $kunjungan->update([
                 'id_customer' => $request->id_customer,
+                'id_site' => $request->id_site,
                 'id_engineer' => $request->id_engineer,
                 'tanggal' => $request->tanggal,
                 'waktu' => $request->waktu,
@@ -143,7 +143,6 @@ class KunjunganController extends Controller
                 'alasan_reschedule' => $alasan,
             ]);
 
-            // Sinkronisasi ulang tools (hapus yang lama, masukin yang baru dipilih)
             if ($request->filled('tools')) {
                 $syncData = [];
                 foreach ($request->tools as $toolId) {
@@ -151,11 +150,9 @@ class KunjunganController extends Controller
                 }
                 $kunjungan->tools()->sync($syncData);
             } else {
-                // Jika tidak ada tool yang dipilih, kosongkan relasinya
                 $kunjungan->tools()->detach();
             }
 
-            // Sync tim support
             if ($request->filled('support_engineers')) {
                 $kunjungan->supportEngineers()->sync($request->support_engineers);
             } else {
@@ -166,28 +163,23 @@ class KunjunganController extends Controller
         return redirect()->back()->with('success', 'Data Kunjungan berhasil diperbarui!');
     }
 
-    // =====================================================================
-    // TAMBAHAN BARU: Hapus Kunjungan (Delete)
-    // =====================================================================
+    // 4. Hapus Kunjungan
     public function destroy($id)
     {
         $kunjungan = Kunjungan::findOrFail($id);
-        
-        // Hapus relasi di tabel pivot kunjungan_tool terlebih dahulu
         $kunjungan->tools()->detach();
-        
-        // Hapus data kunjungan utama
         $kunjungan->delete();
 
         return redirect()->back()->with('success', 'Jadwal Kunjungan berhasil dihapus secara permanen!');
     }
 
-    // 3. Detail Kunjungan
+    // 5. Detail Kunjungan
     public function show($id)
     {
-        // TAMBAHAN: Masukin 'pengeluaran' ke dalam array with()
+        // OPTIMASI: Tambahkan 'site' di eager loading
         $kunjungan = Kunjungan::with([
             'customer', 
+            'site',
             'engineer.user', 
             'tools', 
             'aktivitas', 
@@ -200,7 +192,7 @@ class KunjunganController extends Controller
         return view('kunjungan.show', compact('kunjungan'));
     }
 
-    // 4. Engineer Check-in (Mencatat GPS & Waktu Mulai & Validasi 5KM)
+    // 6. Engineer Check-in
     public function checkIn(Request $request, $id)
     {
         $kunjungan = Kunjungan::with('customer')->findOrFail($id);
@@ -209,43 +201,37 @@ class KunjunganController extends Controller
             'lokasi_gps' => 'required|string',
         ]);
 
-        // Pecah string "latitude, longitude" dari JS ke dalam array
         $coords = explode(',', str_replace(' ', '', $request->lokasi_gps));
         $lat = $coords[0] ?? null;
         $lng = $coords[1] ?? null;
 
-        // ==========================================================
-        // FITUR BARU: VALIDASI RADIUS 5KM (GEOFENCING)
-        // ==========================================================
         $customer = $kunjungan->customer;
+        $site = $kunjungan->id_site ? \App\Models\CustomerSite::find($kunjungan->id_site) : null;
 
-        // A. Cek apakah Pimpinan sudah mengatur koordinat klien
-        if (!$customer->latitude || !$customer->longitude) {
-            return redirect()->back()->with('error', 'Gagal Check-in! Titik GPS klien belum diatur oleh Pimpinan. Harap hubungi atasan.');
+        $targetLat = $site && $site->latitude ? $site->latitude : $customer->latitude;
+        $targetLng = $site && $site->longitude ? $site->longitude : $customer->longitude;
+
+        if (!$targetLat || !$targetLng) {
+            return redirect()->back()->with('error', 'Gagal Check-in! Titik GPS klien/cabang belum diatur oleh Pimpinan. Harap hubungi atasan.');
         }
 
-        // B. Konversi ke tipe data Float
         $latEngineer = (float) $lat;
         $lonEngineer = (float) $lng;
-        $latCustomer = (float) $customer->latitude;
-        $lonCustomer = (float) $customer->longitude;
+        $latTarget = (float) $targetLat;
+        $lonTarget = (float) $targetLng;
 
-        // C. Rumus Haversine untuk menghitung jarak akurat di bumi
-        $earthRadius = 6371; // Radius bumi dalam Kilometer
-        $dLat = deg2rad($latEngineer - $latCustomer);
-        $dLon = deg2rad($lonEngineer - $lonCustomer);
+        $earthRadius = 6371;
+        $dLat = deg2rad($latEngineer - $latTarget);
+        $dLon = deg2rad($lonEngineer - $lonTarget);
 
-        $a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($latCustomer)) * cos(deg2rad($latEngineer)) * sin($dLon/2) * sin($dLon/2);
+        $a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($latTarget)) * cos(deg2rad($latEngineer)) * sin($dLon/2) * sin($dLon/2);
         $c = 2 * atan2(sqrt($a), sqrt(1-$a));
         $jarakKm = $earthRadius * $c;
 
-        // D. Validasi Jarak (Maksimal 5 KM)
         if ($jarakKm > 5) {
-            return redirect()->back()->with('error', 'Gagal Check-in! Anda berada di luar radius. Jarak Anda saat ini: ' . round($jarakKm, 2) . ' KM dari lokasi klien.');
+            return redirect()->back()->with('error', 'Gagal Check-in! Anda berada di luar radius. Jarak Anda saat ini: ' . round($jarakKm, 2) . ' KM dari lokasi tujuan.');
         }
-        // ==========================================================
 
-        // Jika lolos validasi, simpan titik kordinat Check-in ke tabel kunjungan
         $kunjungan->update([
             'status' => 'Dikerjakan',
             'check_in_latitude' => $lat,
@@ -262,7 +248,7 @@ class KunjunganController extends Controller
         return redirect()->back()->with('success', 'Check-in berhasil! Jarak Anda: ' . round($jarakKm, 2) . ' KM dari target.');
     }
 
-    // 5. Engineer Upload Dokumentasi Foto Lapangan
+    // 7. Engineer Upload Dokumentasi
     public function uploadDokumentasi(Request $request, $id)
     {
         $request->validate([
@@ -285,9 +271,7 @@ class KunjunganController extends Controller
         return redirect()->back()->with('success', 'Foto dokumentasi berhasil diunggah!');
     }
 
-    // =====================================================================
-    // TAMBAHAN BARU: Fungsi untuk Simpan Pengeluaran
-    // =====================================================================
+    // 8. Simpan Pengeluaran
     public function storePengeluaran(Request $request, $id)
     {
         $request->validate([
@@ -316,22 +300,20 @@ class KunjunganController extends Controller
         return redirect()->back()->with('success', 'Pengeluaran operasional berhasil dicatat!');
     }
 
-    // 6. Engineer Check-out & Selesaikan Tugas
+    // 9. Check-out
     public function checkOut(Request $request, $id)
     {
         $kunjungan = Kunjungan::findOrFail($id);
 
         $request->validate([
             'catatan' => 'required|string',
-            'lokasi_gps' => 'required|string', // WAJIB AMBIL GPS SAAT CHECKOUT
+            'lokasi_gps' => 'required|string',
         ]);
 
-        // Pecah koordinat GPS Checkout
         $coords = explode(',', str_replace(' ', '', $request->lokasi_gps));
         $lat = $coords[0] ?? null;
         $lng = $coords[1] ?? null;
 
-        // Simpan titik kordinat Check-out ke tabel kunjungan
         $kunjungan->update([
             'check_out_latitude' => $lat,
             'check_out_longitude' => $lng
@@ -356,7 +338,7 @@ class KunjunganController extends Controller
         return redirect()->back()->with('success', 'Check-out berhasil! Menunggu verifikasi tanda tangan customer.');
     }
 
-    // 7. Customer Digital Signature & Selesai
+    // 10. Tanda Tangan Customer
     public function verifySignature(Request $request, $id)
     {
         $request->validate([
@@ -380,7 +362,7 @@ class KunjunganController extends Controller
         return redirect()->route('kunjungan.show', $id)->with('success', 'Kunjungan kerja selesai secara resmi dan dokumen telah ditandatangani!');
     }
 
-    // 8. Engineer Menolak / Reschedule Jadwal Kunjungan
+    // 11. Reschedule
     public function reschedule(Request $request, $id)
     {
         $kunjungan = Kunjungan::findOrFail($id);

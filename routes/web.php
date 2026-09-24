@@ -38,6 +38,11 @@ Route::middleware(['auth', 'role:Engineer'])->prefix('engineer')->name('engineer
 Route::middleware(['auth', 'role:Kepala Pimpinan,Pimpinan'])->prefix('master')->name('master.')->group(function () {
     // Customer
     Route::resource('customer', CustomerController::class)->except(['create', 'show', 'edit']);
+
+    // Master Data Cabang (Site)
+    Route::post('customer/{id_customer}/site', [\App\Http\Controllers\CustomerSiteController::class, 'store'])->name('customer.site.store');
+    Route::put('customer/site/{id_site}', [\App\Http\Controllers\CustomerSiteController::class, 'update'])->name('customer.site.update');
+    Route::delete('customer/site/{id_site}', [\App\Http\Controllers\CustomerSiteController::class, 'destroy'])->name('customer.site.destroy');
     
     // Engineer
     Route::resource('engineer', EngineerController::class)->except(['create', 'show', 'edit']);
@@ -46,16 +51,18 @@ Route::middleware(['auth', 'role:Kepala Pimpinan,Pimpinan'])->prefix('master')->
     Route::resource('tool', ToolController::class)->except(['create', 'show', 'edit']);
 });
 
-// Rute Kunjungan (Semua role login dapat melihat list & detail)
+// Rute Kunjungan
 Route::middleware(['auth'])->prefix('kunjungan')->name('kunjungan.')->group(function () {
     Route::get('/', [KunjunganController::class, 'index'])->name('index');
+
+    // PERBAIKAN BUG: Ditaruh DI ATAS /{id} dan prefix ganda dibuang
+    Route::get('/get-sites/{id_customer}', [CustomerController::class, 'getSites'])->name('getSites');
+
     Route::get('/{id}', [KunjunganController::class, 'show'])->name('show');
 
     // Role Pimpinan
     Route::middleware(['role:Pimpinan'])->group(function () {
         Route::post('/store', [KunjunganController::class, 'store'])->name('store');
-        
-        // TAMBAHAN BARU: Route untuk Edit & Hapus Kunjungan
         Route::put('/{id}', [KunjunganController::class, 'update'])->name('update');
         Route::delete('/{id}', [KunjunganController::class, 'destroy'])->name('destroy');
     });
@@ -65,10 +72,7 @@ Route::middleware(['auth'])->prefix('kunjungan')->name('kunjungan.')->group(func
         Route::post('/{id}/checkin', [KunjunganController::class, 'checkIn'])->name('checkin');
         Route::post('/{id}/dokumentasi', [KunjunganController::class, 'uploadDokumentasi'])->name('dokumentasi');
         Route::post('/{id}/pengeluaran', [KunjunganController::class, 'storePengeluaran'])->name('pengeluaran');
-        
-        // Rute untuk Engineer menolak/reschedule jadwal
         Route::post('/{id}/reschedule', [KunjunganController::class, 'reschedule'])->name('reschedule');
-        
         Route::post('/{id}/checkout', [KunjunganController::class, 'checkOut'])->name('checkout');
     });
 
@@ -76,22 +80,16 @@ Route::middleware(['auth'])->prefix('kunjungan')->name('kunjungan.')->group(func
     Route::post('/{id}/signature', [KunjunganController::class, 'verifySignature'])->name('signature');
 });
 
-// Rute Laporan, Cetak PDF, dan Approval (Akses semua pengguna terautentikasi)
+// Rute Laporan, Cetak PDF, dan Approval
 Route::middleware(['auth'])->prefix('laporan')->name('laporan.')->group(function () {
     Route::get('/', [LaporanController::class, 'index'])->name('index');
     Route::get('/{id}/pdf', [LaporanController::class, 'downloadPdf'])->name('pdf');
-    
-    // Approval Atasan
     Route::post('/{id}/approve', [LaporanController::class, 'updateApproval'])->name('approve');
-    
-    // Kirim Email Customer
     Route::post('/{id}/email', [LaporanController::class, 'sendEmail'])->name('email');
-
-    // TAMBAHAN BARU: Route untuk Engineer submit revisi laporan
     Route::post('/{id}/revisi', [LaporanController::class, 'submitRevisi'])->name('revisi');
 });
 
-// Rute Profil (Akses semua pengguna login)
+// Rute Profil
 Route::middleware(['auth'])->prefix('profile')->name('profile.')->group(function () {
     Route::get('/', [App\Http\Controllers\ProfileController::class, 'index'])->name('index');
     Route::put('/update', [App\Http\Controllers\ProfileController::class, 'update'])->name('update');

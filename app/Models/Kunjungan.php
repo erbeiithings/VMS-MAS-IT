@@ -15,6 +15,12 @@ class Kunjungan extends Model
         return $this->belongsTo(Customer::class, 'id_customer', 'id_customer');
     }
 
+    // TAMBAHAN BARU: Relasi ke lokasi cabang/site
+    public function site()
+    {
+        return $this->belongsTo(CustomerSite::class, 'id_site', 'id_site');
+    }
+
     public function engineer()
     {
         return $this->belongsTo(Engineer::class, 'id_engineer', 'id_engineer');
@@ -42,13 +48,11 @@ class Kunjungan extends Model
         return $this->hasOne(Laporan::class, 'id_kunjungan', 'id_kunjungan');
     }
 
-    // TAMBAHAN BARU: Relasi ke tabel pengeluaran
     public function pengeluaran()
     {
         return $this->hasMany(Pengeluaran::class, 'id_kunjungan', 'id_kunjungan');
     }
 
-    // TAMBAHAN BARU: Relasi ke tabel Support Engineer (Maksimal 4 orang)
     public function supportEngineers()
     {
         return $this->belongsToMany(Engineer::class, 'kunjungan_support', 'id_kunjungan', 'id_engineer')
