@@ -69,6 +69,7 @@ Route::middleware(['auth'])->prefix('kunjungan')->name('kunjungan.')->group(func
 
     // Role Engineer
     Route::middleware(['role:Engineer'])->group(function () {
+        Route::post('/{id}/terima', [KunjunganController::class, 'terima'])->name('terima');
         Route::post('/{id}/checkin', [KunjunganController::class, 'checkIn'])->name('checkin');
         Route::post('/{id}/dokumentasi', [KunjunganController::class, 'uploadDokumentasi'])->name('dokumentasi');
         Route::post('/{id}/pengeluaran', [KunjunganController::class, 'storePengeluaran'])->name('pengeluaran');

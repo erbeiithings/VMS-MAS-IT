@@ -197,6 +197,10 @@ class KunjunganController extends Controller
     {
         $kunjungan = Kunjungan::with('customer')->findOrFail($id);
 
+        if (!in_array($kunjungan->status, ['Terjadwal', 'Dikonfirmasi'])) {
+            return redirect()->back()->with('error', 'Status kunjungan tidak valid untuk dilakukan Check-in.');
+        }
+
         $request->validate([
             'lokasi_gps' => 'required|string',
         ]);
@@ -377,5 +381,17 @@ class KunjunganController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Jadwal berhasil ditolak dan dikembalikan ke Pimpinan untuk dijadwalkan ulang.');
+    }
+
+    // 12. Konfirmasi / Terima Jadwal Kunjungan oleh Engineer
+    public function terima($id)
+    {
+        $kunjungan = Kunjungan::findOrFail($id);
+
+        $kunjungan->update([
+            'status' => 'Dikonfirmasi',
+        ]);
+
+        return redirect()->back()->with('success', 'Jadwal kunjungan berhasil dikonfirmasi dan diterima!');
     }
 }

@@ -46,8 +46,8 @@
     <div class="p-4 md:p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
         <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Status Alur Kunjungan</h4>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
-            <div class="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-[#003399] font-bold">
-                1. Terjadwal
+            <div class="p-2.5 rounded-xl font-bold {{ in_array($kunjungan->status, ['Terjadwal', 'Dikonfirmasi', 'Dikerjakan', 'Selesai']) ? 'bg-blue-50 border border-blue-200 text-[#003399]' : 'bg-slate-50 text-slate-400 border border-slate-200' }}">
+                1. Terjadwal / Dikonfirmasi
             </div>
             <div class="p-2.5 rounded-xl font-bold {{ in_array($kunjungan->status, ['Dikerjakan', 'Selesai']) ? 'bg-blue-50 border border-blue-200 text-[#003399]' : 'bg-slate-50 text-slate-400 border border-slate-200' }}">
                 2. Check-in (GPS)
@@ -61,37 +61,91 @@
         </div>
     </div>
 
-    <!-- SECTION 1: Check-in GPS & Tombol Tolak Jadwal -->
-    @if(Auth::user()->id_role == 3 && $kunjungan->status == 'Terjadwal')
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Kotak Check-In -->
-            <div class="p-6 rounded-2xl bg-blue-50 border border-blue-200 text-center space-y-3">
+    <!-- MAPS & LOKASI LENGKAP -->
+    @php
+        $targetLat = $kunjungan->site->latitude ?? ($kunjungan->customer->latitude ?? null);
+        $targetLng = $kunjungan->site->longitude ?? ($kunjungan->customer->longitude ?? null);
+        $locationQuery = ($targetLat && $targetLng) ? "{$targetLat},{$targetLng}" : urlencode($kunjungan->lokasi);
+    @endphp
+
+    <div class="p-5 md:p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <div>
+                <h4 class="text-sm font-bold text-[#002266] flex items-center gap-2">
+                    📍 Peta Lokasi & Koordinat Target
+                </h4>
+                <p class="text-xs text-slate-500 font-medium mt-0.5">
+                    {{ $kunjungan->site->nama_site ?? $kunjungan->customer->nama_perusahaan ?? 'Lokasi Tujuan' }} — {{ $kunjungan->lokasi }}
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="https://www.google.com/maps/search/?api=1&query={{ $locationQuery }}" target="_blank" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                    🗺️ Buka Google Maps
+                </a>
+                <a href="https://www.google.com/maps/dir/?api=1&destination={{ $locationQuery }}" target="_blank" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                    🧭 Navigasi Rute
+                </a>
+            </div>
+        </div>
+
+        <!-- Iframe Google Maps -->
+        <div class="w-full h-64 rounded-xl overflow-hidden border border-slate-200 shadow-inner">
+            <iframe 
+                class="w-full h-full border-0"
+                loading="lazy"
+                allowfullscreen
+                src="https://maps.google.com/maps?q={{ $locationQuery }}&z=15&output=embed">
+            </iframe>
+        </div>
+    </div>
+
+    <!-- SECTION 1: Konfirmasi Jadwal, Check-in GPS & Tombol Tolak Jadwal -->
+    @if(Auth::user()->id_role == 3)
+        @if($kunjungan->status == 'Terjadwal')
+            <!-- Opsi Konfirmasi Jadwal (Terima / Tolak) -->
+            <div class="p-6 rounded-2xl bg-amber-50 border border-amber-200 space-y-4 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-bold text-amber-900">⚡ Konfirmasi Penugasan Jadwal</h4>
+                    <span class="text-xs font-semibold bg-amber-200 text-amber-800 px-2.5 py-0.5 rounded-full">Menunggu Konfirmasi</span>
+                </div>
+                <p class="text-xs text-amber-800 font-medium">Silakan konfirmasi penerimaan penugasan ini sebelum menuju lokasi kerja.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    <!-- Form Terima -->
+                    <form action="{{ route('kunjungan.terima', $kunjungan->id_kunjungan) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center justify-center gap-2">
+                            ✅ Terima & Konfirmasi Jadwal
+                        </button>
+                    </form>
+
+                    <!-- Form Tolak / Reschedule -->
+                    <form action="{{ route('kunjungan.reschedule', $kunjungan->id_kunjungan) }}" method="POST" class="space-y-2">
+                        @csrf
+                        <div class="flex gap-2">
+                            <input type="text" name="alasan_reschedule" required placeholder="Alasan Tolak (Contoh: Jadwal Bentrok)" class="w-full px-3 py-2 bg-white border border-slate-300 focus:border-rose-400 focus:ring-rose-400 rounded-xl text-xs text-slate-800">
+                            <button type="button" onclick="if(!this.form.checkValidity()) { this.form.reportValidity(); return; } showConfirmModal(this.form, 'Tolak & Reschedule', 'Apakah Anda yakin ingin menolak jadwal ini?')" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition whitespace-nowrap">
+                                ❌ Tolak
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @elseif($kunjungan->status == 'Dikonfirmasi')
+            <!-- Kotak Check-In GPS -->
+            <div class="p-6 rounded-2xl bg-blue-50 border border-blue-200 text-center space-y-3 shadow-sm">
                 <h4 class="text-sm font-bold text-[#002266]">Sudah Tiba di Lokasi Klien?</h4>
                 <p class="text-xs text-slate-600 font-medium">Klik tombol di bawah ini untuk mencatat koordinat GPS dan memulai pengerjaan.</p>
                 
                 <form id="formCheckIn" action="{{ route('kunjungan.checkin', $kunjungan->id_kunjungan) }}" method="POST">
                     @csrf
                     <input type="hidden" name="lokasi_gps" id="lokasi_gps_checkin">
-                    <button type="button" onclick="getGPSCheckIn()" class="w-full px-4 py-3 bg-[#002266] hover:bg-[#001233] text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-900/20 transition">
+                    <button type="button" onclick="getGPSCheckIn()" class="w-full max-w-md mx-auto px-4 py-3 bg-[#002266] hover:bg-[#001233] text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-900/20 transition">
                         📍 Ambil Lokasi GPS & Check-In
                     </button>
                 </form>
             </div>
-
-            <!-- Kotak Tolak / Reschedule Jadwal -->
-            <div class="p-6 rounded-2xl bg-rose-50 border border-rose-200 space-y-3">
-                <h4 class="text-sm font-bold text-rose-700">Jadwal Bentrok / Berhalangan?</h4>
-                <p class="text-xs text-rose-600 font-medium">Tolak jadwal ini dan berikan alasan agar Pimpinan bisa melakukan penjadwalan ulang.</p>
-                
-                <form action="{{ route('kunjungan.reschedule', $kunjungan->id_kunjungan) }}" method="POST" class="space-y-2">
-                    @csrf
-                    <input type="text" name="alasan_reschedule" required placeholder="Alasan (Contoh: Jadwal bentrok / sakit)" class="w-full px-3 py-2.5 bg-white border border-slate-300 focus:border-rose-400 focus:ring-rose-400 rounded-xl text-xs text-slate-800">
-                   <button type="button" onclick="if(!this.form.checkValidity()) { this.form.reportValidity(); return; } showConfirmModal(this.form, 'Tolak & Reschedule', 'Apakah Anda yakin ingin menolak dan meminta reschedule jadwal ini?')" class="w-full py-2.5 bg-white hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-300 rounded-xl text-xs font-bold transition">
-                   ❌ Tolak & Minta Reschedule
-                   </button>
-                </form>
-            </div>
-        </div>
+        @endif
     @endif
 
     @if($kunjungan->status == 'Reschedule')
@@ -196,7 +250,7 @@
     @endif
 
     <!-- SECTION 4: Kotak Tanda Tangan Digital Khusus Customer -->
-    @if(($kunjungan->status == 'Dikerjakan' && $kunjungan->laporan) || ($kunjungan->laporan && !$kunjungan->laporan->buktiPenyelesaian))
+    @if(($kunjungan->status == 'Dikerjakan' &&$kunjungan->laporan) || ($kunjungan->laporan && !$kunjungan->laporan->buktiPenyelesaian))
         <div class="p-5 md:p-6 rounded-2xl bg-amber-50 border border-amber-200 shadow-sm space-y-4">
             <div class="flex items-center gap-2">
                 <span class="w-3 h-3 rounded-full bg-amber-500 animate-ping"></span>
@@ -225,7 +279,7 @@
     @endif
 
     <!-- SECTION 5: Bukti Dokumen Terverifikasi -->
-    @if($kunjungan->laporan && $kunjungan->laporan->buktiPenyelesaian)
+    @if($kunjungan->laporan &&$kunjungan->laporan->buktiPenyelesaian)
         <div class="p-5 md:p-6 rounded-2xl bg-emerald-50 border border-emerald-200 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
             <div>
                 <h4 class="text-sm font-bold text-emerald-700">Pekerjaan Selesai & Dokumen Terverifikasi Resmi</h4>
@@ -247,7 +301,7 @@
                 <p><strong class="text-slate-800">Lead Engineer:</strong> {{ $kunjungan->engineer->user->nama ?? 'Belum Ditugaskan' }}</p>
                 <p><strong class="text-slate-800">Tim Support:</strong> 
                     @if($kunjungan->supportEngineers->count() > 0)
-                        {{ $kunjungan->supportEngineers->pluck('user.nama')->implode(', ') }}
+                        {{$kunjungan->supportEngineers->pluck('user.nama')->implode(', ') }}
                     @else
                         <span class="italic text-slate-400">Tidak ada tim support</span>
                     @endif
@@ -255,7 +309,7 @@
                 <p><strong class="text-slate-800">Alat Kerja Terbawa:</strong></p>
                 <ul class="list-disc list-inside pl-2">
                     @forelse($kunjungan->tools as $tool)
-                        <li>{{ $tool->nama_alat }} ({{ $tool->kode }})</li>
+                        <li>{{ $tool->nama_alat }} ({{$tool->kode }})</li>
                     @empty
                         <li class="italic text-slate-400">Tidak ada tools khusus</li>
                     @endforelse
@@ -265,7 +319,7 @@
 
         <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3 text-xs">
             <h4 class="text-xs font-bold text-[#002266] uppercase tracking-wider border-b border-slate-100 pb-2">Log Waktu & Lokasi GPS</h4>
-            @php $act = $kunjungan->aktivitas->last(); @endphp
+            @php $act =$kunjungan->aktivitas->last(); @endphp
             <div class="space-y-2 font-medium text-slate-600">
                 <p><strong class="text-slate-800">Koordinat Check-in:</strong> <span class="font-mono font-bold text-[#003399]">{{ $act->lokasi ?? 'Belum check-in' }}</span></p>
                 <p><strong class="text-slate-800">Waktu Check-in:</strong> {{ $act->waktu_mulai ?? '-' }}</p>
@@ -291,7 +345,7 @@
                 <tbody class="divide-y divide-slate-100">
                     @php $totalPengeluaran = 0; @endphp
                     @forelse($kunjungan->pengeluaran as $peng)
-                        @php $totalPengeluaran += $peng->nominal; @endphp
+                        @php $totalPengeluaran +=$peng->nominal; @endphp
                         <tr class="hover:bg-slate-50 font-medium">
                             <td class="p-3 font-bold text-slate-800">{{ $peng->jenis_biaya }}</td>
                             <td class="p-3 text-emerald-600 font-bold">Rp {{ number_format($peng->nominal, 0, ',', '.') }}</td>
@@ -347,7 +401,6 @@
 <div id="modalInfoGPS" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
     <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-xs p-6 shadow-2xl text-center transition-all">
         <div id="modalInfoIcon" class="mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-4">
-            <!-- Ikon disuntik via JS -->
         </div>
         <h3 id="modalInfoTitle" class="text-base font-bold text-[#002266] mb-2"></h3>
         <p id="modalInfoMessage" class="text-xs text-slate-600 mb-6 font-medium leading-relaxed"></p>
