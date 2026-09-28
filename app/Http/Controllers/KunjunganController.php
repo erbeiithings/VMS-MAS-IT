@@ -232,8 +232,10 @@ class KunjunganController extends Controller
         $c = 2 * atan2(sqrt($a), sqrt(1-$a));
         $jarakKm = $earthRadius * $c;
 
-        if ($jarakKm > 5) {
-            return redirect()->back()->with('error', 'Gagal Check-in! Anda berada di luar radius. Jarak Anda saat ini: ' . round($jarakKm, 2) . ' KM dari lokasi tujuan.');
+        // Batas radius 100 meter (0.1 KM)
+        if ($jarakKm > 0.1) {
+            $jarakMeter = round($jarakKm * 1000);
+            return redirect()->back()->with('error', 'Gagal Check-in! Anda berada di luar radius 100 meter. Jarak Anda saat ini: ' . $jarakMeter . ' meter dari lokasi tujuan.');
         }
 
         $kunjungan->update([
@@ -249,7 +251,8 @@ class KunjunganController extends Controller
             'deskripsi' => 'Engineer tiba di lokasi dan memulai pengerjaan.',
         ]);
 
-        return redirect()->back()->with('success', 'Check-in berhasil! Jarak Anda: ' . round($jarakKm, 2) . ' KM dari target.');
+        $jarakMeter = round($jarakKm * 1000);
+        return redirect()->back()->with('success', 'Check-in berhasil! Jarak Anda: ' . $jarakMeter . ' meter dari target.');
     }
 
     // 7. Engineer Upload Dokumentasi
@@ -307,7 +310,7 @@ class KunjunganController extends Controller
     // 9. Check-out
     public function checkOut(Request $request, $id)
     {
-        $kunjungan = Kunjungan::findOrFail($id);
+        $kunjungan = Kunjungan::with('customer')->findOrFail($id);
 
         $request->validate([
             'catatan' => 'required|string',
@@ -317,6 +320,35 @@ class KunjunganController extends Controller
         $coords = explode(',', str_replace(' ', '', $request->lokasi_gps));
         $lat = $coords[0] ?? null;
         $lng = $coords[1] ?? null;
+
+        $customer = $kunjungan->customer;
+        $site = $kunjungan->id_site ? \App\Models\CustomerSite::find($kunjungan->id_site) : null;
+
+        $targetLat = $site && $site->latitude ? $site->latitude : $customer->latitude;
+        $targetLng = $site && $site->longitude ? $site->longitude : $customer->longitude;
+
+        if (!$targetLat || !$targetLng) {
+            return redirect()->back()->with('error', 'Gagal Check-out! Titik GPS klien/cabang belum diatur oleh Pimpinan.');
+        }
+
+        $latEngineer = (float) $lat;
+        $lonEngineer = (float) $lng;
+        $latTarget = (float) $targetLat;
+        $lonTarget = (float) $targetLng;
+
+        $earthRadius = 6371;
+        $dLat = deg2rad($latEngineer - $latTarget);
+        $dLon = deg2rad($lonEngineer - $lonTarget);
+
+        $a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($latTarget)) * cos(deg2rad($latEngineer)) * sin($dLon/2) * sin($dLon/2);
+        $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+        $jarakKm = $earthRadius * $c;
+
+        // Batas radius 100 meter (0.1 KM) untuk Check-out
+        if ($jarakKm > 0.1) {
+            $jarakMeter = round($jarakKm * 1000);
+            return redirect()->back()->with('error', 'Gagal Check-out! Anda berada di luar radius 100 meter. Jarak Anda saat ini: ' . $jarakMeter . ' meter dari lokasi tujuan.');
+        }
 
         $kunjungan->update([
             'check_out_latitude' => $lat,
@@ -339,14 +371,15 @@ class KunjunganController extends Controller
             ]
         );
 
-        return redirect()->back()->with('success', 'Check-out berhasil! Menunggu verifikasi tanda tangan customer.');
+        $jarakMeter = round($jarakKm * 1000);
+        return redirect()->back()->with('success', 'Check-out berhasil! Jarak Anda: ' . $jarakMeter . ' meter dari target. Silakan lanjutkan ke tahap TTD.');
     }
-
-    // 10. Tanda Tangan Customer
+    // 10. Tanda Tangan Engineer & Customer
     public function verifySignature(Request $request, $id)
     {
         $request->validate([
-            'signature' => 'required|string',
+            'signature_engineer' => 'required|string',
+            'signature_customer' => 'required|string',
         ]);
 
         $kunjungan = Kunjungan::findOrFail($id);
@@ -355,7 +388,8 @@ class KunjunganController extends Controller
         BuktiPenyelesaian::updateOrCreate(
             ['id_laporan' => $laporan->id_laporan],
             [
-                'tanda_tangan_customer' => $request->signature,
+                'tanda_tangan_engineer' => $request->signature_engineer,
+                'tanda_tangan_customer' => $request->signature_customer,
                 'tanggal_tanda_tangan' => now(),
                 'status' => 'Ditandatangani',
             ]
@@ -363,7 +397,7 @@ class KunjunganController extends Controller
 
         $kunjungan->update(['status' => 'Selesai']);
 
-        return redirect()->route('kunjungan.show', $id)->with('success', 'Kunjungan kerja selesai secara resmi dan dokumen telah ditandatangani!');
+        return redirect()->route('kunjungan.show', $id)->with('success', 'Kunjungan kerja selesai secara resmi dan dokumen telah ditandatangani oleh kedua pihak!');
     }
 
     // 11. Reschedule

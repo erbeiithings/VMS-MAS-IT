@@ -14,14 +14,14 @@
         }
         .header-table {
             width: 100%;
-            border-bottom: 2px solid #002266; /* Diubah ke warna Corporate Blue */
+            border-bottom: 2px solid #002266;
             padding-bottom: 12px;
             margin-bottom: 15px;
         }
         .title {
             font-size: 18px;
             font-weight: bold;
-            color: #002266; /* Diubah ke warna Corporate Blue */
+            color: #002266;
             text-transform: uppercase;
         }
         .subtitle {
@@ -35,7 +35,7 @@
             margin: 15px 0 10px 0;
             text-transform: uppercase;
             letter-spacing: 1px;
-            background-color: #f0f4ff; /* Background biru sangat muda */
+            background-color: #f0f4ff;
             color: #002266;
             padding: 6px;
             border-radius: 4px;
@@ -61,7 +61,7 @@
             text-align: left;
         }
         .data-table th {
-            background-color: #002266; /* Header tabel jadi Corporate Blue */
+            background-color: #002266;
             color: #ffffff;
             font-weight: bold;
             font-size: 10px;
@@ -96,17 +96,14 @@
     <!-- Header Dokumen -->
     <table class="header-table">
         <tr>
-            <!-- INI BAGIAN LOGONYA -->
             <td style="width: 15%; text-align: left; vertical-align: middle;">
                 <img src="{{ public_path('images/logo-masit.png') }}" alt="Logo MAS-IT" style="max-height: 55px; object-fit: contain;">
             </td>
-            <!-- INFORMASI PERUSAHAAN -->
             <td style="width: 45%; vertical-align: middle;">
                 <div class="title">PT MAS-IT SOLUSI INTEGRASI</div>
                 <div class="subtitle">IT Infrastructure, Networking & Security Management Solutions</div>
                 <div class="subtitle">Website: mas-it.id | Email: support@mas-it.id</div>
             </td>
-            <!-- DETAIL DOKUMEN -->
             <td style="width: 40%; text-align: right; vertical-align: middle;">
                 <div style="font-size: 12px; font-weight: bold; color: #003399;">BUKTI PENYELESAIAN PEKERJAAN</div>
                 <div style="font-size: 10px; font-family: monospace; color: #334155;">No: {{ $kunjungan->nomor }}</div>
@@ -150,7 +147,7 @@
                 <th style="width: 25%;">Item Pekerjaan</th>
                 <th style="width: 35%;">Deskripsi & Catatan Akhir</th>
                 <th style="width: 20%;">Waktu Mulai (GPS)</th>
-                <th style="width: 20%;">Waktu Selesai</th>
+                <th style="width: 20%;">Waktu Selesai (GPS)</th>
             </tr>
         </thead>
         <tbody>
@@ -159,41 +156,17 @@
                 <td>{{ $aktivitas->catatan ?? 'Pekerjaan telah diselesaikan sesuai dengan instruksi kerja.' }}</td>
                 <td>
                     {{ $aktivitas->waktu_mulai ? date('d/m/Y H:i', strtotime($aktivitas->waktu_mulai)) : '-' }}<br>
-                    <small style="color: #003399; font-size: 8px;">GPS: {{ $aktivitas->lokasi ?? '-' }}</small>
+                    @if($kunjungan->check_in_latitude && $kunjungan->check_in_longitude)
+                        <small style="color: #003399; font-size: 8px;">GPS: {{ $kunjungan->check_in_latitude }}, {{ $kunjungan->check_in_longitude }}</small>
+                    @endif
                 </td>
                 <td>
-                    {{ $aktivitas->waktu_selesai ? date('d/m/Y H:i', strtotime($aktivitas->waktu_selesai)) : '-' }}
+                    {{ $aktivitas->waktu_selesai ? date('d/m/Y H:i', strtotime($aktivitas->waktu_selesai)) : '-' }}<br>
+                    @if($kunjungan->check_out_latitude && $kunjungan->check_out_longitude)
+                        <small style="color: #003399; font-size: 8px;">GPS: {{ $kunjungan->check_out_latitude }}, {{ $kunjungan->check_out_longitude }}</small>
+                    @endif
                 </td>
             </tr>
-        </tbody>
-    </table>
-
-    <!-- Tools / Alat Kerja yang Digunakan -->
-    <div style="font-weight: bold; margin-bottom: 5px; font-size: 10px; color: #002266;">DAFTAR ALAT / TOOLS YANG DIGUNAKAN:</div>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th style="width: 5%; text-align: center;">No</th>
-                <th style="width: 25%;">Kode Alat</th>
-                <th style="width: 40%;">Nama Alat</th>
-                <th style="width: 15%;">Kategori</th>
-                <th style="width: 15%;">Kondisi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($kunjungan->tools as $index => $tool)
-                <tr>
-                    <td style="text-align: center;">{{ $index + 1 }}</td>
-                    <td style="font-family: monospace; font-weight: bold; color: #003399;">{{ $tool->kode }}</td>
-                    <td>{{ $tool->nama_alat }}</td>
-                    <td>{{ $tool->kategori }}</td>
-                    <td>{{ $tool->kondisi }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="5" style="text-align: center; color: #64748b; font-style: italic;">Tidak ada alat tambahan yang terdaftar.</td>
-                </tr>
-            @endforelse
         </tbody>
     </table>
 
@@ -202,7 +175,14 @@
         <tr>
             <td class="signature-box">
                 <div style="color: #475569;">Dikerjakan Oleh,</div>
-                <div style="font-weight: bold; color: #002266; margin-bottom: 45px;">Engineer MAS-IT</div>
+                <div style="font-weight: bold; color: #002266; margin-bottom: 5px;">Engineer MAS-IT</div>
+                @if($bukti && isset($bukti->tanda_tangan_engineer) && $bukti->tanda_tangan_engineer)
+                    <div>
+                        <img src="{{ $bukti->tanda_tangan_engineer }}" class="sign-img" alt="Engineer Signature">
+                    </div>
+                @else
+                    <div style="height: 55px;"></div>
+                @endif
                 <div style="border-top: 1px solid #002266; display: inline-block; width: 80%; padding-top: 3px; font-weight: bold; color: #1e293b;">
                     {{ $kunjungan->engineer->user->nama ?? 'Engineer' }}
                 </div>
