@@ -79,46 +79,51 @@
                 <tbody class="divide-y divide-slate-100">
                     @forelse($customers as $c)
                         <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="p-4 font-bold text-[#003399]">{{ $c->nama_perusahaan }}</td>
-                            <td class="p-4 font-bold text-slate-800">{{ $c->pic }}</td>
-                            <td class="p-4 font-medium">
-                                <p class="text-slate-700">{{ $c->telepon }}</p>
-                                <p class="text-[10px] text-slate-500 mt-0.5">{{ $c->email }}</p>
-                            </td>
-                            <td class="p-4 font-medium">
-                                <p class="text-slate-700 max-w-xs truncate">{{ $c->alamat }}</p>
-                                @if($c->latitude && $c->longitude)
-                                    <p class="text-[10px] font-bold text-emerald-600 mt-1">GPS: {{ $c->latitude }}, {{ $c->longitude }}
-                                @else
-                                    <p class="text-[10px] font-bold text-rose-500 mt-1">GPS: Belum diatur</p>
-                                @endif
-                            </td>
-                            <td class="p-4 text-center">
-                                <div class="inline-flex items-center gap-2">
-                                    <!-- TOMBOL BARU: Kelola Cabang -->
-                                    <button onclick="openCabangModal({{ $c->id_customer }}, '{{ addslashes($c->nama_perusahaan) }}')" 
-                                            class="p-1.5 bg-blue-50 border border-blue-100 hover:bg-blue-600 text-blue-600 hover:text-white rounded-lg transition shadow-sm" title="Kelola Cabang/Site">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                                        </svg>
-                                    </button>
+                           <td class="p-4">
+    <a href="{{ route('master.customer.show', $c->kode ?? $c->id_customer) }}" class="font-bold text-[#003399] hover:underline" title="Lihat detail customer">{{ $c->nama_perusahaan }}</a>
+    <div class="text-[10px] font-mono font-bold text-slate-400 mt-0.5">
+        <a href="{{ route('master.customer.show', $c->kode ?? $c->id_customer) }}" class="hover:text-[#003399] hover:underline">{{ $c->kode ?? 'ID: '.$c->id_customer }}</a>
+    </div>
+</td>
+<td class="p-4 font-bold text-slate-800">{{ $c->pic }}</td>
+<td class="p-4 font-medium">
+    <p class="text-slate-700">{{ $c->telepon }}</p>
+    <p class="text-[10px] text-slate-500 mt-0.5">{{ $c->email }}</p>
+</td>
+<td class="p-4 font-medium">
+    <p class="text-slate-700 max-w-xs truncate">{{ $c->alamat }}</p>
+    @if($c->latitude && $c->longitude)
+        <p class="text-[10px] font-bold text-emerald-600 mt-1">GPS: {{ $c->latitude }}, {{ $c->longitude }}</p>
+    @else
+        <p class="text-[10px] font-bold text-rose-500 mt-1">GPS: Belum diatur</p>
+    @endif
+</td>
+<td class="p-4 text-center">
+    <div class="inline-flex items-center gap-2">
+        <!-- TOMBOL: Kelola Cabang -->
+        <button onclick="openCabangModal('{{ $c->kode ?? $c->id_customer }}', '{{ addslashes($c->nama_perusahaan) }}')" 
+                class="p-1.5 bg-blue-50 border border-blue-100 hover:bg-blue-600 text-blue-600 hover:text-white rounded-lg transition shadow-sm" title="Kelola Cabang/Site">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+        </button>
 
-                                    <!-- Tombol Edit (Bawaan) -->
-                                    <button onclick="openEditModal({{ json_encode($c) }})" class="p-1.5 bg-amber-50 border border-amber-100 hover:bg-amber-500 text-amber-600 hover:text-white rounded-lg transition shadow-sm" title="Edit">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    </button>
-                                    
-                                    <!-- Tombol Delete -->
-                                    <form action="{{ route('master.customer.destroy', $c->id_customer) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" onclick="showConfirmModal(this.form, 'Hapus Customer', 'Apakah Anda yakin ingin menghapus customer {{ $c->nama_perusahaan }}?')" 
-                                                class="p-1.5 bg-rose-50 border border-rose-100 hover:bg-rose-600 text-rose-600 hover:text-white rounded-lg transition shadow-sm" title="Hapus">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
+        <!-- Tombol Edit -->
+        <button onclick="openEditModal({{ json_encode($c) }})" class="p-1.5 bg-amber-50 border border-amber-100 hover:bg-amber-500 text-amber-600 hover:text-white rounded-lg transition shadow-sm" title="Edit">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        </button>
+        
+        <!-- Tombol Delete -->
+        <form action="{{ route('master.customer.destroy', $c->kode ?? $c->id_customer) }}" method="POST">
+            @csrf
+            @method('DELETE')
+            <button type="button" onclick="showConfirmModal(this.form, 'Hapus Customer', 'Apakah Anda yakin ingin menghapus customer {{ $c->nama_perusahaan }}?')" 
+                    class="p-1.5 bg-rose-50 border border-rose-100 hover:bg-rose-600 text-rose-600 hover:text-white rounded-lg transition shadow-sm" title="Hapus">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+        </form>
+    </div>
+</td>
                         </tr>
                     @empty
                         <tr>
@@ -237,14 +242,12 @@
 <!-- Modal Kelola Cabang -->
 <div id="modalKelolaCabang" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-4xl p-6 shadow-2xl flex flex-col max-h-[90vh]">
-        <!-- Header -->
         <div class="flex justify-between items-center mb-4">
             <h4 class="text-base font-bold text-[#002266]">Kelola Cabang: <span id="namaPerusahaanCabang" class="text-blue-600"></span></h4>
             <button onclick="document.getElementById('modalKelolaCabang').classList.add('hidden')" class="text-slate-400 hover:text-rose-500 transition text-lg">&times;</button>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 overflow-y-auto pr-2">
-            <!-- Form Tambah Cabang -->
             <div class="md:col-span-1 bg-slate-50 p-4 rounded-xl border border-slate-200 h-fit">
                 <h5 class="font-bold text-slate-700 text-xs mb-3 uppercase tracking-wider">Tambah Cabang</h5>
                 <form id="formTambahCabang" method="POST" class="space-y-3 text-xs font-medium">
@@ -271,7 +274,6 @@
                 </form>
             </div>
 
-            <!-- List Data Cabang -->
             <div class="md:col-span-2">
                 <h5 class="font-bold text-slate-700 text-xs mb-3 uppercase tracking-wider">Daftar Cabang Aktif</h5>
                 <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
@@ -284,7 +286,6 @@
                             </tr>
                         </thead>
                         <tbody id="tbody_cabang" class="divide-y divide-slate-100 bg-white">
-                            <!-- Diisi via AJAX -->
                             <tr><td colspan="3" class="p-4 text-center text-slate-400 italic">Memuat data...</td></tr>
                         </tbody>
                     </table>
@@ -294,17 +295,13 @@
     </div>
 </div>
 
-<!-- MODAL INFO KHUSUS NOTIFIKASI GPS -->
+<!-- MODAL INFO GPS -->
 <div id="modalInfoGPS" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
     <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-xs p-6 shadow-2xl text-center transition-all">
-        <div id="modalInfoIcon" class="mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-4">
-            <!-- Ikon disuntik dari JS -->
-        </div>
+        <div id="modalInfoIcon" class="mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-4"></div>
         <h3 id="modalInfoTitle" class="text-base font-bold text-[#002266] mb-2"></h3>
         <p id="modalInfoMessage" class="text-xs text-slate-600 mb-6 font-medium leading-relaxed"></p>
-        <button type="button" onclick="document.getElementById('modalInfoGPS').classList.add('hidden')" class="w-full px-4 py-2.5 bg-[#002266] hover:bg-[#001233] text-white font-bold rounded-xl text-xs transition">
-            Tutup
-        </button>
+        <button type="button" onclick="document.getElementById('modalInfoGPS').classList.add('hidden')" class="w-full px-4 py-2.5 bg-[#002266] hover:bg-[#001233] text-white font-bold rounded-xl text-xs transition">Tutup</button>
     </div>
 </div>
 
@@ -312,7 +309,6 @@
     function showGPSModal(title, message, isSuccess) {
         document.getElementById('modalInfoTitle').innerText = title;
         document.getElementById('modalInfoMessage').innerText = message;
-        
         const iconContainer = document.getElementById('modalInfoIcon');
         if(isSuccess) {
             iconContainer.className = 'mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-4 bg-emerald-100 text-emerald-600 border border-emerald-200';
@@ -321,7 +317,6 @@
             iconContainer.className = 'mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-4 bg-rose-100 text-rose-600 border border-rose-200';
             iconContainer.innerHTML = '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
         }
-        
         document.getElementById('modalInfoGPS').classList.remove('hidden');
     }
 
@@ -331,41 +326,37 @@
                 (position) => {
                     document.getElementById(latId).value = position.coords.latitude;
                     document.getElementById(longId).value = position.coords.longitude;
-                    showGPSModal('Lokasi Ditemukan!', 'Titik koordinat GPS Anda berhasil didapatkan dan dimasukkan ke dalam form.', true);
+                    showGPSModal('Lokasi Ditemukan!', 'Titik koordinat GPS Anda berhasil didapatkan.', true);
                 },
-                (error) => {
-                    showGPSModal('Gagal Membaca GPS', 'Pastikan GPS aktif dan izin lokasi (Location) pada browser Anda telah diizinkan.', false);
-                },
+                (error) => { showGPSModal('Gagal Membaca GPS', 'Pastikan GPS aktif dan izin lokasi diizinkan.', false); },
                 { enableHighAccuracy: true }
             );
         } else {
-            showGPSModal('Tidak Mendukung', 'Browser atau perangkat Anda tidak mendukung fitur Geolocation.', false);
+            showGPSModal('Tidak Mendukung', 'Browser tidak mendukung fitur Geolocation.', false);
         }
     }
 
     function openEditModal(customer) {
-        document.getElementById('formEditCustomer').action = `/master/customer/${customer.id_customer}`;
+        document.getElementById('formEditCustomer').action = `/master/customer/${customer.kode}`;
         document.getElementById('edit_nama_perusahaan').value = customer.nama_perusahaan;
         document.getElementById('edit_pic').value = customer.pic;
         document.getElementById('edit_telepon').value = customer.telepon;
         document.getElementById('edit_email').value = customer.email;
         document.getElementById('edit_alamat').value = customer.alamat;
-        
         document.getElementById('edit_latitude').value = customer.latitude || '';
         document.getElementById('edit_longitude').value = customer.longitude || '';
-        
         document.getElementById('modalEditCustomer').classList.remove('hidden');
     }
 
-    function openCabangModal(idCustomer, namaPerusahaan) {
+    function openCabangModal(kodeCustomer, namaPerusahaan) {
         document.getElementById('namaPerusahaanCabang').innerText = namaPerusahaan;
-        document.getElementById('formTambahCabang').action = `/master/customer/${idCustomer}/site`;
+        document.getElementById('formTambahCabang').action = `/master/customer/${kodeCustomer}/site`;
         document.getElementById('modalKelolaCabang').classList.remove('hidden');
         
         const tbody = document.getElementById('tbody_cabang');
         tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-400 italic">Memuat data cabang...</td></tr>';
         
-        fetch(`/kunjungan/get-sites/${idCustomer}`)
+        fetch(`/kunjungan/get-sites/${kodeCustomer}`)
             .then(res => res.json())
             .then(data => {
                 tbody.innerHTML = '';

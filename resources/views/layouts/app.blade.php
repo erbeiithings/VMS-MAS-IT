@@ -11,45 +11,99 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style> body { font-family: 'Poppins', sans-serif; } </style>
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        #sidebarNav::-webkit-scrollbar { width: 5px; }
+        #sidebarNav::-webkit-scrollbar-track { background: transparent; }
+        #sidebarNav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.35); border-radius: 99px; }
+        #sidebarNav::-webkit-scrollbar-thumb:active { background: rgba(255,255,255,0.6); }
+        #sidebarNav { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.35) transparent; }
+    </style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 flex flex-col md:flex-row overflow-x-hidden">
 
     <!-- Mobile Top Navigation Header -->
     <div class="md:hidden flex items-center justify-between p-4 bg-gradient-to-r from-[#001233] to-[#0044cc] border-b border-blue-900 sticky top-0 z-40 shadow-lg">
         <div class="flex items-center gap-3">
-            <!-- LOGO MAS-IT DI MOBILE -->
-            <img src="{{ asset('images/logo-masit.png') }}" alt="MAS-IT Logo" class="h-8 object-contain drop-shadow-md">
-            <span class="font-bold text-sm text-white tracking-wide">MAS-IT VMS</span>
+            @php
+                $mobileDashboardRoute = match(Auth::user()->id_role ?? 0) {
+                    1 => 'kepala.dashboard',
+                    2 => 'pimpinan.dashboard',
+                    3 => 'engineer.dashboard',
+                    default => 'login',
+                };
+                $mobileDashboardUrl = route($mobileDashboardRoute);
+            @endphp
+            <a href="{{ $mobileDashboardUrl }}" onclick="window.location.href='{{ $mobileDashboardUrl }}'; return false;" class="flex items-center gap-3 cursor-pointer">
+                <img src="{{ asset('images/logo-masit.png') }}" alt="MAS-IT Logo" class="h-8 object-contain drop-shadow-md">
+                <span class="font-bold text-sm text-white tracking-wide">MAS-IT VMS</span>
+            </a>
         </div>
         <button onclick="toggleMobileSidebar()" class="p-2 text-blue-200 hover:text-white focus:outline-none">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
         </button>
     </div>
 
-    <!-- Sidebar Menu (Responsive) -->
-    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-[#001233] via-[#002266] to-[#0055ff] border-r border-blue-800/50 flex flex-col justify-between shrink-0 transform -translate-x-full md:translate-x-0 md:static transition-transform duration-200 ease-in-out min-h-screen shadow-[4px_0_24px_rgba(0,34,102,0.15)]">
-        <div>
+    <!-- Sidebar Menu (Diperbaiki agar tingginya full screen sticky/fixed aman) -->
+    <aside id="sidebar" class="fixed md:sticky top-0 inset-y-0 left-0 z-50 w-64 h-screen bg-gradient-to-b from-[#001233] via-[#002266] to-[#0055ff] border-r border-blue-800/50 flex flex-col shrink-0 transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out shadow-[4px_0_24px_rgba(0,34,102,0.15)]">
+        <div class="flex flex-col h-full min-h-0">
             <!-- Brand Logo -->
-            <div class="p-5 border-b border-blue-800/40 flex items-center justify-between">
-                <div class="flex items-center gap-3">
+            <div class="p-5 border-b border-blue-800/40 flex items-center justify-between shrink-0">
+                @php
+                    $dashboardRoute = match(Auth::user()->id_role ?? 0) {
+                        1 => 'kepala.dashboard',
+                        2 => 'pimpinan.dashboard',
+                        3 => 'engineer.dashboard',
+                        default => 'login',
+                    };
+                    $dashboardUrl = route($dashboardRoute);
+                @endphp
+                <a href="{{ $dashboardUrl }}" onclick="window.location.href='{{ $dashboardUrl }}'; return false;" class="flex items-center gap-3 cursor-pointer">
                     <img src="{{ asset('images/logo-masit.png') }}" alt="MAS-IT Logo" class="h-10 object-contain drop-shadow-md">
                     <div>
                         <h2 class="font-bold text-base tracking-tight text-white">MAS-IT VMS</h2>
                         <p class="text-[10px] text-blue-300 font-medium tracking-wider uppercase">{{ Auth::user()->role->nama_role ?? 'Pengguna' }}</p>
                     </div>
+                </a>
+                <div class="flex items-center gap-1">
+                    <button onclick="toggleMobileSidebar()" class="md:hidden text-blue-300 hover:text-white text-2xl leading-none px-1">&times;</button>
                 </div>
-                <button onclick="toggleMobileSidebar()" class="md:hidden text-blue-300 hover:text-white">&times;</button>
+            </div>
+
+            <!-- Profil pengguna -->
+            <div class="p-4 border-b border-blue-800/40 shrink-0">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <div class="w-8 h-8 rounded-full bg-transparent border border-blue-200 text-white flex items-center justify-center text-xs font-bold shadow-sm shrink-0">
+                            {{ strtoupper(substr(Auth::user()->nama, 0, 1)) }}
+                        </div>
+                        <div class="truncate">
+                            <p class="text-xs font-semibold text-white truncate">{{ Auth::user()->nama }}</p>
+                            <p class="text-[10px] text-blue-200 truncate">{{ Auth::user()->email }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0 ml-2">
+                        <a href="{{ route('profile.index') }}" title="Pengaturan Profil" class="p-1.5 text-blue-200 hover:text-white rounded-lg hover:bg-white/10 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        </a>
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" title="Logout" class="p-1.5 text-blue-200 hover:text-white rounded-lg hover:bg-white/10 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
 
             <!-- Navigation Links -->
-            <nav class="p-4 space-y-1.5 text-xs font-medium">
+            <div class="relative flex-1 min-h-0 flex">
+            <nav id="sidebarNav" class="p-4 space-y-1.5 text-xs font-medium flex-1 overflow-y-auto overscroll-contain" style="-webkit-overflow-scrolling: touch; touch-action: pan-y; scrollbar-width: none;">
                 @php
                     $roleId = Auth::user()->id_role ?? 0;
                     $currentRoute = Route::currentRouteName();
                 @endphp
 
-                <!-- Dashboard link per role -->
                 @if($roleId == 1)
                     <a href="{{ route('kepala.dashboard') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition {{ str_contains($currentRoute, 'kepala.dashboard') ? 'bg-white/20 text-white shadow-lg border border-white/10' : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
@@ -74,12 +128,29 @@
                     <span>Kunjungan Kerja</span>
                 </a>
 
+                @if($roleId == 3)
+                    <a href="{{ route('peminjaman.pengembalian') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition {{ str_contains($currentRoute, 'peminjaman') ? 'bg-white/20 text-white shadow-lg border border-white/10' : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a3 3 0 00-3-3H6a3 3 0 00-3 3v1m18 0v-1a3 3 0 00-3-3h-1m-4 8h6m-6 0H6m12 0a2 2 0 002-2v-4a2 2 0 00-2-2h-2m-4-4h.01M6 20h.01"/></svg>
+                        <span>Pengembalian Tools</span>
+                    </a>
+                @endif
+
                 @if($roleId == 1 || $roleId == 2)
                     <div class="pt-3 pb-1 text-[10px] uppercase font-bold text-blue-300/80 tracking-wider">Master Data</div>
                     <a href="{{ route('master.customer.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition {{ str_contains($currentRoute, 'master.customer') ? 'bg-white/20 text-white shadow-lg border border-white/10' : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                         <span>Data Customer</span>
                     </a>
+                    <a href="{{ route('master.site.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition {{ str_contains($currentRoute, 'master.site') ? 'bg-white/20 text-white shadow-lg border border-white/10' : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <span>Data Site</span>
+                    </a>
+                    @if($roleId == 1)
+                    <a href="{{ route('master.pimpinan.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition {{ str_contains($currentRoute, 'master.pimpinan') ? 'bg-white/20 text-white shadow-lg border border-white/10' : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        <span>Data Pimpinan</span>
+                    </a>
+                    @endif
                     <a href="{{ route('master.engineer.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition {{ str_contains($currentRoute, 'master.engineer') ? 'bg-white/20 text-white shadow-lg border border-white/10' : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                         <span>Data Engineer</span>
@@ -87,6 +158,10 @@
                     <a href="{{ route('master.tool.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition {{ str_contains($currentRoute, 'master.tool') ? 'bg-white/20 text-white shadow-lg border border-white/10' : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         <span>Tools & Alat Kerja</span>
+                    </a>
+                    <a href="{{ route('master.format-nomor.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition {{ str_contains($currentRoute, 'master.format-nomor') ? 'bg-white/20 text-white shadow-lg border border-white/10' : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>
+                        <span>Format Nomor</span>
                     </a>
                 @endif
 
@@ -96,32 +171,9 @@
                     <span>Laporan & PDF</span>
                 </a>
             </nav>
-        </div>
-
-        <div class="p-4 border-t border-blue-400/20">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3 overflow-hidden">
-                    <div class="w-8 h-8 rounded-full bg-transparent border border-blue-200 text-white flex items-center justify-center text-xs font-bold shadow-sm shrink-0">
-                        {{ strtoupper(substr(Auth::user()->nama, 0, 1)) }}
-                    </div>
-                    <div class="truncate">
-                        <p class="text-xs font-semibold text-white truncate">{{ Auth::user()->nama }}</p>
-                        <p class="text-[10px] text-blue-200 truncate">{{ Auth::user()->email }}</p>
-                    </div>
-                </div>
-                
-                <!-- Aksi: Profil & Logout -->
-                <div class="flex items-center gap-1 shrink-0 ml-2">
-                    <a href="{{ route('profile.index') }}" title="Pengaturan Profil" class="p-1.5 text-blue-200 hover:text-white rounded-lg hover:bg-white/10 transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    </a>
-                    <form action="{{ route('logout') }}" method="POST">
-                        @csrf
-                        <button type="submit" title="Logout" class="p-1.5 text-blue-200 hover:text-white rounded-lg hover:bg-white/10 transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                        </button>
-                    </form>
-                </div>
+            <div id="sidebarScrollTrack" class="w-2 shrink-0 my-2 mr-1.5 rounded-full bg-white/20 relative touch-none" style="display:none;">
+                <div id="sidebarScrollThumb" class="absolute left-0 right-0 rounded-full bg-white/70" style="min-height: 40px;"></div>
+            </div>
             </div>
         </div>
     </aside> 
@@ -163,8 +215,61 @@
 
     <script>
         function toggleMobileSidebar() {
-            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+            const isOpen = !sidebar.classList.contains('-translate-x-full');
+            const isMobile = window.innerWidth < 768;
+            document.body.style.overflow = (isOpen && isMobile) ? 'hidden' : '';
+            if (isOpen) updateSidebarScrollbar();
         }
+
+        function updateSidebarScrollbar() {
+            const nav = document.getElementById('sidebarNav');
+            const track = document.getElementById('sidebarScrollTrack');
+            const thumb = document.getElementById('sidebarScrollThumb');
+            if (!nav || !track || !thumb) return;
+            const scrollable = nav.scrollHeight - nav.clientHeight;
+            if (scrollable <= 0) { track.style.display = 'none'; return; }
+            track.style.display = 'block';
+            const trackH = track.clientHeight;
+            const thumbH = Math.max(30, trackH * nav.clientHeight / nav.scrollHeight);
+            thumb.style.height = thumbH + 'px';
+            const maxTop = trackH - thumbH;
+            thumb.style.top = (maxTop * nav.scrollTop / scrollable) + 'px';
+        }
+        (function initSidebarScrollbar() {
+            const nav = document.getElementById('sidebarNav');
+            const track = document.getElementById('sidebarScrollTrack');
+            const thumb = document.getElementById('sidebarScrollThumb');
+            if (!nav || !track || !thumb) return;
+            nav.addEventListener('scroll', updateSidebarScrollbar, { passive: true });
+            window.addEventListener('resize', updateSidebarScrollbar);
+            let dragging = false, startY = 0, startScroll = 0;
+            thumb.addEventListener('pointerdown', function(e) {
+                dragging = true; startY = e.clientY; startScroll = nav.scrollTop;
+                thumb.setPointerCapture(e.pointerId);
+                e.preventDefault();
+            });
+            thumb.addEventListener('pointermove', function(e) {
+                if (!dragging) return;
+                const scrollable = nav.scrollHeight - nav.clientHeight;
+                const trackH = track.clientHeight;
+                const thumbH = thumb.clientHeight;
+                const maxTop = trackH - thumbH;
+                if (maxTop <= 0 || scrollable <= 0) return;
+                nav.scrollTop = startScroll + (e.clientY - startY) * scrollable / maxTop;
+            });
+            ['pointerup', 'pointercancel'].forEach(function(ev) {
+                thumb.addEventListener(ev, function() { dragging = false; });
+            });
+            track.addEventListener('pointerdown', function(e) {
+                if (e.target === thumb) return;
+                const rect = track.getBoundingClientRect();
+                const ratio = (e.clientY - rect.top) / rect.height;
+                nav.scrollTop = ratio * (nav.scrollHeight - nav.clientHeight);
+            });
+            setTimeout(updateSidebarScrollbar, 300);
+        })();
 
         let targetFormToSubmit = null;
         function showConfirmModal(formElement, title, message) {

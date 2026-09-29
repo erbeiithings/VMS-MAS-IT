@@ -19,7 +19,7 @@
             <h3 class="text-lg font-bold text-[#002266]">Daftar Kunjungan Engineer</h3>
             <p class="text-xs text-slate-500 font-medium mt-0.5">Monitoring seluruh siklus kunjungan dari penugasan hingga verifikasi</p>
         </div>
-        @if(Auth::user()->id_role == 2)
+        @if(in_array(Auth::user()->id_role, [1, 2]))
             <button onclick="document.getElementById('modalTambahKunjungan').classList.remove('hidden')" 
                     class="px-4 py-2.5 bg-[#002266] hover:bg-[#001233] text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-900/20 transition flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -87,14 +87,23 @@
                                 <p class="text-[10px] text-slate-500 mt-0.5 font-medium">{{ $k->tanggal }} ({{$k->waktu }})</p>
                             </td>
                             <td class="p-4 align-top">
-                                <p class="font-bold text-slate-800">{{ $k->customer->nama_perusahaan ?? '-' }}</p>
+                                <p class="font-bold text-slate-800">
+                                    @if($k->customer)
+                                        <a href="{{ route('master.customer.show', $k->customer->kode) }}" class="hover:text-[#003399] hover:underline">{{ $k->customer->nama_perusahaan }}</a>
+                                    @else
+                                        -
+                                    @endif
+                                </p>
                                 <!-- Indikator Cabang (Jika Ada) -->
                                 @if(isset($k->site) &&$k->site)
                                     <span class="inline-block px-1.5 py-0.5 bg-blue-100 text-[#003399] text-[9px] font-bold rounded mt-1 border border-blue-200">
                                         📍 Cabang: {{ $k->site->nama_cabang }}
                                     </span>
                                 @endif
-                                <p class="text-[10px] text-slate-500 truncate max-w-xs mt-0.5" title="{{ $k->lokasi }}">{{ $k->lokasi }}</p>
+                                <p class="text-[10px] text-slate-500 truncate max-w-xs mt-0.5" title="{{ $k->alamat_sinkron }}">{{ $k->alamat_sinkron }}</p>
+                                @if($k->patokan)
+                                    <p class="text-[10px] text-amber-600 font-semibold truncate max-w-xs" title="{{ $k->patokan }}">📎 {{ $k->patokan }}</p>
+                                @endif
                             </td>
                             <td class="p-4 font-medium text-slate-700 align-top">{{ $k->pekerjaan }}</td>
                             <td class="p-4 align-top">
@@ -109,16 +118,16 @@
                                 @endif
                             </td>
                             <td class="p-4 align-top text-center flex flex-col items-center gap-2">
-                                <a href="{{ route('kunjungan.show', $k->id_kunjungan) }}" class="w-full px-3 py-1.5 bg-blue-50 border border-blue-100 hover:bg-[#003399] text-[#003399] hover:text-white rounded-lg text-[10px] font-bold transition">
+                                <a href="{{ route('kunjungan.show', $k->nomor) }}" class="w-full px-3 py-1.5 bg-blue-50 border border-blue-100 hover:bg-[#003399] text-[#003399] hover:text-white rounded-lg text-[10px] font-bold transition">
                                     Detail
                                 </a>
                                 
-                                @if(Auth::user()->id_role == 2 && $k->status != 'Selesai')
+                                @if(in_array(Auth::user()->id_role, [1, 2]) && $k->status != 'Selesai')
                                     <button onclick="document.getElementById('modalEditKunjungan-{{ $k->id_kunjungan }}').classList.remove('hidden')" class="w-full px-3 py-1.5 bg-amber-50 border border-amber-100 hover:bg-amber-500 text-amber-600 hover:text-white rounded-lg text-[10px] font-bold transition">
                                         Edit / Reschedule
                                     </button>
                                     
-                                    <form id="formDeleteKunjungan-{{ $k->id_kunjungan }}" action="{{ route('kunjungan.destroy', $k->id_kunjungan) }}" method="POST" class="w-full">
+                                    <form id="formDeleteKunjungan-{{ $k->id_kunjungan }}" action="{{ route('kunjungan.destroy', $k->nomor) }}" method="POST" class="w-full">
                                         @csrf
                                         @method('DELETE')
                                         <button type="button" onclick="showConfirmModal(document.getElementById('formDeleteKunjungan-{{ $k->id_kunjungan }}'), 'Hapus Jadwal', 'Apakah Anda yakin ingin menghapus jadwal kunjungan ini secara permanen? Data yang sudah dihapus tidak dapat dikembalikan.')" class="w-full px-3 py-1.5 bg-rose-50 border border-rose-100 hover:bg-rose-600 text-rose-600 hover:text-white rounded-lg text-[10px] font-bold transition">
@@ -130,21 +139,21 @@
                         </tr>
 
                         <!-- Modal Edit Kunjungan -->
-                        @if(Auth::user()->id_role == 2 && $k->status != 'Selesai')
+                        @if(in_array(Auth::user()->id_role, [1, 2]) && $k->status != 'Selesai')
                         <div id="modalEditKunjungan-{{ $k->id_kunjungan }}" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 text-left">
                             <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
                                 <div class="flex justify-between items-center mb-4">
                                     <h4 class="text-base font-bold text-[#002266]">Edit Jadwal: {{ $k->nomor }}</h4>
                                     <button onclick="document.getElementById('modalEditKunjungan-{{ $k->id_kunjungan }}').classList.add('hidden')" class="text-slate-400 hover:text-rose-500 transition text-lg">&times;</button>
                                 </div>
-                                <form action="{{ route('kunjungan.update', $k->id_kunjungan) }}" method="POST" class="space-y-4 text-xs">
+                                <form action="{{ route('kunjungan.update', $k->nomor) }}" method="POST" class="space-y-4 text-xs">
                                     @csrf
                                     @method('PUT')
                                     <div>
                                         <label class="block text-slate-700 font-semibold mb-1.5">Customer / Klien</label>
                                         <select name="id_customer" data-target-site="id_site_edit_{{ $k->id_kunjungan }}" required class="customer-select-edit w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]">
                                             @foreach($customers as $c)
-                                                <option value="{{ $c->id_customer }}" {{ $k->id_customer == $c->id_customer ? 'selected' : '' }}>{{ $c->nama_perusahaan }}</option>
+                                                <option value="{{ $c->id_customer }}" data-kode="{{ $c->kode }}" data-alamat="{{ $c->alamat }}" {{ $k->id_customer == $c->id_customer ? 'selected' : '' }}>{{ $c->nama_perusahaan }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -192,8 +201,13 @@
                                         <input type="text" name="pekerjaan" value="{{ $k->pekerjaan }}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]">
                                     </div>
                                     <div>
-                                        <label class="block text-slate-700 font-semibold mb-1.5">Alamat / Patokan Kunjungan</label>
-                                        <textarea name="lokasi" rows="2" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]">{{ $k->lokasi }}</textarea>
+                                        <label class="block text-slate-700 font-semibold mb-1.5">Alamat Kunjungan 🔒</label>
+                                        <textarea rows="2" readonly placeholder="Otomatis terisi dari alamat site/customer..." class="lokasi-edit w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-xl text-slate-500 focus:outline-none cursor-not-allowed">{{ $k->alamat_sinkron }}</textarea>
+                                        <p class="text-[10px] text-slate-400 mt-1 font-medium">🔒 Terkunci — mengikuti alamat site/customer yang dipilih.</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-slate-700 font-semibold mb-1.5">Patokan <span class="text-slate-400 font-normal">(opsional)</span></label>
+                                        <textarea name="patokan" rows="2" placeholder="Contoh: Lantai 3, Gedung B, dekat lobby..." class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]">{{ $k->patokan }}</textarea>
                                     </div>
                                     <div>
                                         <label class="block text-slate-700 font-semibold mb-1.5">Tools & Alat yang Dibawa</label>
@@ -233,7 +247,7 @@
 </div>
 
 <!-- Modal Tambah Kunjungan -->
-@if(Auth::user()->id_role == 2)
+@if(in_array(Auth::user()->id_role, [1, 2]))
 <div id="modalTambahKunjungan" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
@@ -247,7 +261,7 @@
                 <select name="id_customer" id="id_customer_add" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]">
                     <option value="">Pilih Customer</option>
                     @foreach($customers as $c)
-                        <option value="{{ $c->id_customer }}">{{ $c->nama_perusahaan }} ({{$c->pic }})</option>
+                        <option value="{{ $c->id_customer }}" data-kode="{{ $c->kode }}" data-alamat="{{ $c->alamat }}">{{ $c->nama_perusahaan }} ({{$c->pic }})</option>
                     @endforeach
                 </select>
             </div>
@@ -293,8 +307,13 @@
                 <input type="text" name="pekerjaan" placeholder="Misal: Instalasi Router Core & Switch" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]">
             </div>
             <div>
-                <label class="block text-slate-700 font-semibold mb-1.5">Alamat / Patokan Kunjungan</label>
-                <textarea name="lokasi" rows="2" placeholder="Detail area gedung / lantai..." required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]"></textarea>
+                <label class="block text-slate-700 font-semibold mb-1.5">Alamat Kunjungan 🔒</label>
+                <textarea id="lokasi_add" rows="2" readonly placeholder="Otomatis terisi dari alamat site/customer..." class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-xl text-slate-500 focus:outline-none cursor-not-allowed"></textarea>
+                <p class="text-[10px] text-slate-400 mt-1 font-medium">🔒 Terkunci — mengikuti alamat site/customer yang dipilih.</p>
+            </div>
+            <div>
+                <label class="block text-slate-700 font-semibold mb-1.5">Patokan <span class="text-slate-400 font-normal">(opsional)</span></label>
+                <textarea name="patokan" rows="2" placeholder="Contoh: Lantai 3, Gedung B, dekat lobby..." class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003399]"></textarea>
             </div>
             <div>
                 <label class="block text-slate-700 font-semibold mb-1.5">Tools & Alat yang Dibawa</label>
@@ -369,24 +388,41 @@
             }
         });
 
-        // --- SCRIPT AJAX FETCH CABANG/SITE (FITUR BARU) ---
-        const loadSitesAjax = (idCustomer, siteSelectElement, selectedSiteId = null) => {
+        // --- SCRIPT AJAX FETCH CABANG/SITE + AUTO-FILL ALAMAT ---
+        const escAttr = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        const alamatOfOption = (selectEl) => {
+            const opt = selectEl.options[selectEl.selectedIndex];
+            return opt ? (opt.getAttribute('data-alamat') || '') : '';
+        };
+
+        // Isi textarea lokasi dari site yang dipilih; jika tanpa site, pakai alamat customer
+        const syncLokasi = (siteSelectEl, lokasiEl, customerSelectEl) => {
+            if (!lokasiEl) return;
+            if (siteSelectEl.value) {
+                const alamatSite = alamatOfOption(siteSelectEl);
+                if (alamatSite) lokasiEl.value = alamatSite;
+            } else if (customerSelectEl) {
+                lokasiEl.value = alamatOfOption(customerSelectEl);
+            }
+        };
+
+        const loadSitesAjax = (kodeCustomer, siteSelectElement, selectedSiteId = null) => {
             siteSelectElement.innerHTML = '<option value="">Memuat data...</option>';
             siteSelectElement.disabled = true;
 
-            if(!idCustomer) {
+            if(!kodeCustomer) {
                 siteSelectElement.innerHTML = '<option value="">Pilih Customer Terlebih Dahulu</option>';
                 return;
             }
 
-            fetch(`/kunjungan/get-sites/${idCustomer}`)
+            fetch(`/kunjungan/get-sites/${kodeCustomer}`)
                 .then(res => res.json())
                 .then(data => {
                     siteSelectElement.disabled = false;
                     siteSelectElement.innerHTML = '<option value="">Pusat / Tanpa Cabang</option>';
                     data.forEach(site => {
                         let isSelected = (selectedSiteId == site.id_site) ? 'selected' : '';
-                        siteSelectElement.innerHTML += `<option value="${site.id_site}" ${isSelected}>${site.nama_cabang}</option>`;
+                        siteSelectElement.innerHTML += `<option value="${site.id_site}" data-alamat="${escAttr(site.alamat_lengkap)}" ${isSelected}>${site.nama_cabang}</option>`;
                     });
                 })
                 .catch(err => {
@@ -398,8 +434,15 @@
         // Trigger AJAX untuk Modal Tambah Kunjungan
         const customerAdd = document.getElementById('id_customer_add');
         const siteAdd = document.getElementById('id_site_add');
+        const lokasiAdd = document.getElementById('lokasi_add');
         if(customerAdd && siteAdd) {
-            customerAdd.addEventListener('change', (e) => loadSitesAjax(e.target.value, siteAdd));
+            customerAdd.addEventListener('change', (e) => {
+                const kode = e.target.selectedOptions[0]?.dataset.kode || '';
+                loadSitesAjax(kode, siteAdd);
+                // Default: isi alamat customer sampai site dipilih
+                if (lokasiAdd) lokasiAdd.value = alamatOfOption(customerAdd);
+            });
+            siteAdd.addEventListener('change', () => syncLokasi(siteAdd, lokasiAdd, customerAdd));
         }
 
         // Trigger AJAX untuk SEMUA Modal Edit Kunjungan
@@ -407,14 +450,22 @@
             const siteSelectId = select.getAttribute('data-target-site');
             const siteSelectElement = document.getElementById(siteSelectId);
             const preSelectedSite = siteSelectElement.getAttribute('data-selected');
-            
+            const modal = select.closest('[id^="modalEditKunjungan-"]');
+            const lokasiEl = modal ? modal.querySelector('.lokasi-edit') : null;
+
             // Render cabang awal (saat halaman dimuat pertama kali)
             if(select.value) {
-                loadSitesAjax(select.value, siteSelectElement, preSelectedSite);
+                const kodeAwal = select.selectedOptions[0]?.dataset.kode || '';
+                loadSitesAjax(kodeAwal, siteSelectElement, preSelectedSite);
             }
 
             // Render cabang ulang jika customer diganti di tengah edit
-            select.addEventListener('change', (e) => loadSitesAjax(e.target.value, siteSelectElement));
+            select.addEventListener('change', (e) => {
+                const kode = e.target.selectedOptions[0]?.dataset.kode || '';
+                loadSitesAjax(kode, siteSelectElement);
+                if (lokasiEl) lokasiEl.value = alamatOfOption(select);
+            });
+            siteSelectElement.addEventListener('change', () => syncLokasi(siteSelectElement, lokasiEl, select));
         });
     });
 </script>
