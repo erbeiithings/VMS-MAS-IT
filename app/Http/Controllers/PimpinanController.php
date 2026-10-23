@@ -44,7 +44,9 @@ class PimpinanController extends Controller
             'username' => 'required|string|max:50|unique:pengguna,username',
             'email' => 'required|email|max:100|unique:pengguna,email',
             'password' => 'required|string|min:6',
-            'kontak' => 'required|string|max:20',
+            'kontak' => ['required', 'string', 'max:20', 'regex:/^\+?[0-9\s\-().]+$/'],
+        ], [
+            'kontak.regex' => 'No. WA hanya boleh berisi angka (boleh diawali +, spasi, strip, titik, kurung).',
         ]);
 
         User::create([
@@ -69,8 +71,10 @@ class PimpinanController extends Controller
             'nama' => 'required|string|max:100',
             'username' => 'required|string|max:50|unique:pengguna,username,' . $pimpinan->id_pengguna . ',id_pengguna',
             'email' => 'required|email|max:100|unique:pengguna,email,' . $pimpinan->id_pengguna . ',id_pengguna',
-            'kontak' => 'required|string|max:20',
+            'kontak' => ['required', 'string', 'max:20', 'regex:/^\+?[0-9\s\-().]+$/'],
             'status_akun' => 'required|in:Aktif,Nonaktif',
+        ], [
+            'kontak.regex' => 'No. WA hanya boleh berisi angka (boleh diawali +, spasi, strip, titik, kurung).',
         ]);
 
         $userData = [

@@ -4,35 +4,47 @@
 @section('header_title', 'Detail Tool')
 
 @section('content')
-<div class="space-y-6">
-    <div class="flex items-center justify-between">
-        <a href="{{ route('master.tool.index') }}" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">&larr; Kembali ke Daftar Tool</a>
-        <a href="{{ route('peminjaman.riwayat', $tool->kode) }}" class="px-4 py-2.5 bg-white hover:bg-slate-50 text-[#002266] border border-[#002266]/30 rounded-xl text-xs font-bold shadow-sm transition">Riwayat Lengkap</a>
+<div class="space-y-5">
+
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <a href="{{ route('master.tool.index') }}" class="inline-flex items-center gap-1.5 text-[13px] font-semibold text-slate-500 hover:text-[#003399] transition w-fit">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Kembali ke Daftar Tool
+        </a>
+        <a href="{{ route('peminjaman.riwayat', $tool->kode) }}" class="inline-flex items-center gap-1.5 h-10 px-4 bg-white hover:bg-slate-50 text-[#002266] border border-slate-200 rounded-lg text-[13px] font-semibold shadow-sm transition w-fit">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Riwayat Lengkap
+        </a>
     </div>
 
     {{-- Info Tool --}}
-    <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-6">
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 sm:p-6">
         <div class="flex flex-wrap items-start justify-between gap-4">
-            <div>
-                <span class="font-mono text-xs text-[#003399] font-bold uppercase bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-lg">{{ $tool->kode }}</span>
-                <h3 class="text-xl font-bold text-[#002266] mt-2">{{ $tool->nama_alat }}</h3>
-                <p class="text-xs text-slate-500 font-medium mt-1">{{ $tool->kategori }}</p>
+            <div class="flex items-start gap-4">
+                <span class="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 text-[#003399] flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+                </span>
+                <div>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-[#003399] border border-blue-100 font-mono uppercase">{{ $tool->kode }}</span>
+                    <h2 class="text-xl font-bold text-slate-900 mt-2">{{ $tool->nama_alat }}</h2>
+                    <p class="text-xs text-slate-500 mt-1">{{ $tool->kategori }}</p>
+                </div>
             </div>
-            <span class="px-3 py-1.5 rounded-full text-xs font-bold {{ $tool->status_ketersediaan == 'Tersedia' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold border {{ $tool->status_ketersediaan == 'Tersedia' ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-rose-50 text-rose-700 border-rose-100' }}">
                 {{ $tool->status_ketersediaan }}
             </span>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 text-xs">
-            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
-                <p class="text-slate-500 font-bold uppercase text-[10px]">Stok Tersedia</p>
-                <p class="text-lg font-bold text-emerald-600 mt-1">{{ $tool->stok }}</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5">
+                <p class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">Stok Tersedia</p>
+                <p class="text-xl font-bold text-emerald-600 mt-1">{{ $tool->stok }}</p>
             </div>
-            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
-                <p class="text-slate-500 font-bold uppercase text-[10px]">Kategori</p>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5">
+                <p class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">Kategori</p>
                 <p class="text-sm font-bold text-slate-800 mt-1">{{ $tool->kategori }}</p>
             </div>
-            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 col-span-2">
-                <p class="text-slate-500 font-bold uppercase text-[10px]">Spesifikasi</p>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 col-span-2">
+                <p class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">Spesifikasi</p>
                 <p class="text-sm font-medium text-slate-700 mt-1">{{ $tool->spesifikasi ?? '-' }}</p>
             </div>
         </div>
@@ -42,49 +54,53 @@
     </div>
 
     {{-- Riwayat Peminjaman Terakhir --}}
-    <div class="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm">
-        <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
-            <h4 class="text-sm font-bold text-[#002266]">Peminjaman Terakhir</h4>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-4 py-3.5 border-b border-slate-200 flex items-center justify-between">
+            <h3 class="text-sm font-bold text-slate-900">Peminjaman Terakhir</h3>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-600">
-                <thead class="text-[11px] uppercase bg-slate-50 text-slate-500 border-b border-slate-200">
+            <table class="w-full text-sm">
+                <thead class="text-[11px] uppercase tracking-wider text-slate-500 bg-slate-50">
                     <tr>
-                        <th class="p-4 font-bold">No. Kunjungan</th>
-                        <th class="p-4 font-bold">Engineer</th>
-                        <th class="p-4 font-bold text-center">Jumlah</th>
-                        <th class="p-4 font-bold">Dipinjam</th>
-                        <th class="p-4 font-bold">Status</th>
+                        <th class="px-4 py-3 text-left font-semibold">No. Kunjungan</th>
+                        <th class="px-4 py-3 text-left font-semibold">Engineer</th>
+                        <th class="px-4 py-3 text-center font-semibold">Jumlah</th>
+                        <th class="px-4 py-3 text-left font-semibold">Dipinjam</th>
+                        <th class="px-4 py-3 text-left font-semibold">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody>
                     @forelse($riwayat as $r)
                         <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="p-4">
+                            <td class="px-4 py-3 border-t border-slate-100">
                                 @if($r->kunjungan)
-                                    <a href="{{ route('kunjungan.show', $r->kunjungan->nomor) }}" class="font-mono font-bold text-[#003399] hover:underline">{{ $r->kunjungan->nomor }}</a>
-                                    <span class="block text-[11px] text-slate-500">{{ $r->kunjungan->customer->nama_perusahaan ?? '' }}</span>
+                                    <a href="{{ route('kunjungan.show', $r->kunjungan->nomor) }}" class="font-mono text-[11px] font-semibold text-[#003399] uppercase hover:underline">{{ $r->kunjungan->nomor }}</a>
+                                    <span class="block text-[11px] text-slate-500 mt-0.5">{{ $r->kunjungan->customer->nama_perusahaan ?? '' }}</span>
                                 @else
                                     <span class="italic text-slate-400">{{ $r->keterangan ?? 'Keperluan lain' }}</span>
                                 @endif
                             </td>
-                            <td class="p-4 font-bold text-slate-800">{{ $r->engineer->user->nama ?? '-' }}</td>
-                            <td class="p-4 text-center font-bold">{{ $r->jumlah }}</td>
-                            <td class="p-4 font-medium">{{ $r->tanggal_pinjam->format('d M Y, H:i') }}</td>
-                            <td class="p-4">
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold {{ $r->status == 'Dipinjam' ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-emerald-100 text-emerald-700 border border-emerald-200' }}">
+                            <td class="px-4 py-3 border-t border-slate-100 font-semibold text-slate-800">{{ $r->engineer->user->nama ?? '-' }}</td>
+                            <td class="px-4 py-3 border-t border-slate-100 text-center">
+                                <span class="inline-flex items-center justify-center min-w-[2.5rem] px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                    {{ ($r->id_kunjungan && $r->jumlah == 0) ? 'Alat Tim' : $r->jumlah }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 border-t border-slate-100 text-slate-700 whitespace-nowrap">{{ $r->tanggal_pinjam->format('d M Y, H:i') }}</td>
+                            <td class="px-4 py-3 border-t border-slate-100">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold border {{ $r->status == 'Dipinjam' ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-emerald-50 text-emerald-700 border-emerald-100' }}">
                                     {{ $r->status }}
                                 </span>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="p-6 text-center text-slate-400">Belum ada riwayat peminjaman.</td></tr>
+                        <tr><td colspan="5" class="px-4 py-8 border-t border-slate-100 text-center text-slate-400 font-medium italic">Belum ada riwayat peminjaman.</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
         @if($riwayat->hasPages())
-        <div class="px-6 py-4 border-t border-slate-200">{{ $riwayat->links() }}</div>
+        <div class="px-4 py-3 border-t border-slate-200 bg-slate-50">{{ $riwayat->links() }}</div>
         @endif
     </div>
 </div>

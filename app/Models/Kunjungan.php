@@ -64,6 +64,12 @@ class Kunjungan extends Model
         return $this->hasMany(KunjunganKonfirmasi::class, 'id_kunjungan', 'id_kunjungan');
     }
 
+    /** QA ronde 2 #2: true bila minimal satu engineer sudah menerima (accept) tugas ini. */
+    public function sudahAdaYangMenerima(): bool
+    {
+        return $this->konfirmasi()->where('status', 'diterima')->exists();
+    }
+
     /**
      * Alamat kunjungan yang selalu sinkron dengan data site terkini.
      * Jika kunjungan terhubung ke site, pakai alamat site (live dari master).
@@ -71,5 +77,59 @@ class Kunjungan extends Model
     public function getAlamatSinkronAttribute()
     {
         return $this->site->alamat_lengkap ?? $this->lokasi;
+    }
+
+    /**
+     * QA #13: label status untuk tampilan. Nilai status internal tetap
+     * 'Dikerjakan', yang tampil ke user 'Sedang Dikerjakan'.
+     */
+    public function statusLabel()
+    {
+        return $this->status === 'Dikerjakan' ? 'Sedang Dikerjakan' : $this->status;
+    }
+
+    /**
+     * QA #9: peta id_engineer => kunjungan aktif terdekat (status Terjadwal /
+     * Dikonfirmasi / Sedang Dikerjakan, sebagai lead atau support).
+     * Dipakai untuk catatan "sedang ditugaskan" di master data & form assign.
+     */
+    public static function tugasAktifPerEngineer()
+    {
+        $aktif = self::with('supportEngineers')
+            ->whereIn('status', ['Terjadwal', 'Dikonfirmasi', 'Dikerjakan'])
+            ->orderBy('tanggal')
+            ->orderBy('waktu')
+            ->get();
+
+        $map = [];
+        foreach ($aktif as $k) {
+            $ids = collect([$k->id_engineer])
+                ->merge($k->supportEngineers->pluck('id_engineer'))
+                ->filter()->unique();
+            foreach ($ids as $eid) {
+                if (!isset($map[$eid])) {
+                    $map[$eid] = $k;
+                }
+            }
+        }
+        return $map;
+    }
+
+    /**
+     * QA #10: cari kunjungan lain yang bentrok untuk seorang engineer pada
+     * tanggal + jam yang sama (di luar kunjungan yang dikecualikan).
+     */
+    public static function cariBentrok($idEngineer, $tanggal, $waktu, $kecualiId = null)
+    {
+        $jam = substr((string) $waktu, 0, 5);
+        return self::where('tanggal', $tanggal)
+            ->whereIn('status', ['Terjadwal', 'Dikonfirmasi', 'Dikerjakan'])
+            ->when($kecualiId, fn($q) => $q->where('id_kunjungan', '!=', $kecualiId))
+            ->where(function ($q) use ($idEngineer) {
+                $q->where('id_engineer', $idEngineer)
+                  ->orWhereHas('supportEngineers', fn($sq) => $sq->where('engineers.id_engineer', $idEngineer));
+            })
+            ->get()
+            ->first(fn($k) => substr((string) $k->waktu, 0, 5) === $jam);
     }
 }

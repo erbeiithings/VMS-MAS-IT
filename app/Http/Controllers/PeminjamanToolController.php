@@ -82,7 +82,7 @@ class PeminjamanToolController extends Controller
             ]);
         });
 
-        return redirect()->back()->with('success', "Berhasil meminjam {$validated['jumlah']}x {$tool->nama_alat}. Stok tersisa: " . $tool->fresh()->stok);
+        return redirect()->back()->with('success', "Berhasil meminjam {$validated['jumlah']} {$tool->nama_alat}. Stok tersisa: " . $tool->fresh()->stok);
     }
 
     /**
@@ -117,6 +117,18 @@ class PeminjamanToolController extends Controller
         $nomorKunjungan = $pinjam->kunjungan->nomor ?? '';
 
         DB::transaction(function () use ($pinjam, $request, $pengembali, $nomorKunjungan) {
+            // QA #11: jumlah fisik tercatat tersebar di catatan tim (lead yang
+            // pegang jumlahnya). Total yang dikembalikan = total jumlah semua
+            // catatan Dipinjam untuk tool ini di kunjungan yang sama.
+            $totalJumlah = $pinjam->jumlah;
+            if ($pinjam->id_kunjungan) {
+                $totalJumlah = (int) PeminjamanTool::where('id_kunjungan', $pinjam->id_kunjungan)
+                    ->where('id_tool', $pinjam->id_tool)
+                    ->where('status', 'Dipinjam')
+                    ->sum('jumlah');
+                if ($totalJumlah < 1) $totalJumlah = max(1, $pinjam->jumlah);
+            }
+
             $pinjam->update([
                 'status' => 'Dikembalikan',
                 'tanggal_kembali' => now(),
@@ -139,11 +151,11 @@ class PeminjamanToolController extends Controller
                     ]);
             }
 
-            // Stok hanya bertambah 1x (alat fisiknya cuma satu)
-            $pinjam->tool()->increment('stok', $pinjam->jumlah);
+            // Stok hanya bertambah sesuai total jumlah fisik catatan tim (1x proses)
+            $pinjam->tool()->increment('stok', $totalJumlah);
         });
 
-        return redirect()->back()->with('success', "Berhasil mengembalikan {$pinjam->jumlah}x {$pinjam->tool->nama_alat} (kondisi: {$request->kondisi_kembali}). Stok bertambah menjadi " . $pinjam->tool->fresh()->stok . ".");
+        return redirect()->back()->with('success', "Berhasil mengembalikan {$pinjam->tool->nama_alat} (kondisi: {$request->kondisi_kembali}). Stok bertambah menjadi " . $pinjam->tool->fresh()->stok . ".");
     }
 
     /**

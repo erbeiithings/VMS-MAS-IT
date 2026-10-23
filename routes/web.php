@@ -21,6 +21,15 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// QA ronde 2: fallback tampil file upload lama yang tersimpan di public/ aplikasi
+// (di production folder itu bukan webroot, jadi tidak bisa diakses langsung).
+Route::middleware(['auth'])->get('/uploads-lokal/{path}', function ($path) {
+    $aman = str_replace(['../', '..\\'], '', $path);
+    $full = public_path(str_replace('/', DIRECTORY_SEPARATOR, $aman));
+    abort_unless(is_file($full), 404);
+    return response()->file($full);
+})->where('path', '.*')->name('uploads.lokal');
+
 // Role: Kepala Pimpinan
 Route::middleware(['auth', 'role:Kepala Pimpinan'])->prefix('kepala')->name('kepala.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'kepalaDashboard'])->name('dashboard');
@@ -67,6 +76,14 @@ Route::middleware(['auth', 'role:Kepala Pimpinan,Pimpinan'])->prefix('master')->
 
     // Pengaturan Format Nomor / Prefix (Kepala Pimpinan & Pimpinan)
     Route::resource('format-nomor', \App\Http\Controllers\FormatNomorController::class)->except(['create', 'show', 'edit']);
+
+    // QA #1: Master pengguna gabungan (pimpinan + engineer, sortir per role)
+    Route::get('pengguna', [\App\Http\Controllers\MasterPenggunaController::class, 'index'])->name('pengguna.index');
+
+    // QA #15: Opsi formulir (jenis biaya & kategori foto yang bisa dikelola admin)
+    Route::get('opsi-formulir', [\App\Http\Controllers\OpsiFormulirController::class, 'index'])->name('opsi-formulir.index');
+    Route::post('opsi-formulir', [\App\Http\Controllers\OpsiFormulirController::class, 'store'])->name('opsi-formulir.store');
+    Route::delete('opsi-formulir/{id}', [\App\Http\Controllers\OpsiFormulirController::class, 'destroy'])->name('opsi-formulir.destroy');
 });
 
 // Rute Peminjaman Tools (semua role login)
@@ -100,6 +117,7 @@ Route::middleware(['auth'])->prefix('kunjungan')->name('kunjungan.')->group(func
     // Role Pimpinan & Kepala Pimpinan
     Route::middleware(['role:Kepala Pimpinan,Pimpinan'])->group(function () {
         Route::post('/{id}/ganti-engineer', [KunjunganController::class, 'gantiEngineer'])->name('ganti-engineer');
+        Route::post('/{id}/force-selesai', [KunjunganController::class, 'forceSelesai'])->name('force-selesai');
     });
 
     // Role Engineer
@@ -112,12 +130,32 @@ Route::middleware(['auth'])->prefix('kunjungan')->name('kunjungan.')->group(func
         Route::post('/{id}/checkout', [KunjunganController::class, 'checkOut'])->name('checkout');
         Route::post('/{id}/buat-laporan', [KunjunganController::class, 'buatLaporan'])->name('buat-laporan');
         Route::post('/{id}/revisi-catatan', [KunjunganController::class, 'revisiCatatan'])->name('revisi-catatan');
+        Route::post('/{id}/simpan-laporan', [KunjunganController::class, 'simpanLaporanLengkap'])->name('simpan-laporan');
     });
+
+    // Simpan revisi laporan: Engineer (yang terlibat) + Pimpinan/Kepala Pimpinan
+    // (otorisasi detail di controller)
+    Route::post('/{id}/simpan-revisi-laporan', [KunjunganController::class, 'simpanRevisiLaporan'])->name('simpan-revisi-laporan');
+
+    // QA #8: revisi tools oleh engineer terlibat / pimpinan (otorisasi di controller)
+    Route::post('/{id}/tools/revisi', [KunjunganController::class, 'revisiTools'])->name('tools.revisi');
+    // QA #18: edit/hapus pengeluaran & dokumentasi (otorisasi di controller)
+    Route::put('/{id}/pengeluaran/{idPengeluaran}', [KunjunganController::class, 'updatePengeluaran'])->name('pengeluaran.update');
+    Route::delete('/{id}/pengeluaran/{idPengeluaran}', [KunjunganController::class, 'destroyPengeluaran'])->name('pengeluaran.destroy');
+    Route::put('/{id}/dokumentasi/{idDokumentasi}', [KunjunganController::class, 'updateDokumentasi'])->name('dokumentasi.update');
+    Route::delete('/{id}/dokumentasi/{idDokumentasi}', [KunjunganController::class, 'destroyDokumentasi'])->name('dokumentasi.destroy');
+    // QA #5: ACC / tolak penolakan engineer oleh pimpinan (otorisasi di controller)
+    Route::post('/{id}/konfirmasi/{idEngineer}/acc-penolakan', [KunjunganController::class, 'accPenolakan'])->name('konfirmasi.acc-penolakan');
+    Route::post('/{id}/konfirmasi/{idEngineer}/tolak-penolakan', [KunjunganController::class, 'tolakPenolakan'])->name('konfirmasi.tolak-penolakan');
+    // QA #22: tandai pengeluaran sudah/belum diganti perusahaan (pimpinan)
+    Route::post('/{id}/pengeluaran/{idPengeluaran}/ganti', [KunjunganController::class, 'toggleGantiPengeluaran'])->name('pengeluaran.ganti');
 
     // Verifikasi Tanda Tangan Customer
     Route::post('/{id}/signature', [KunjunganController::class, 'verifySignature'])->name('signature');
     // Simpan draft TTD otomatis (agar tidak hilang saat refresh)
     Route::post('/{id}/signature-draft', [KunjunganController::class, 'saveSignatureDraft'])->name('signature-draft');
+    // Simpan draft teks Bagian 1 laporan otomatis (agar tidak hilang saat refresh)
+    Route::post('/{id}/laporan-draft', [KunjunganController::class, 'saveLaporanDraft'])->name('laporan-draft');
 });
 
 // Rute Laporan, Cetak PDF, dan Approval
@@ -125,9 +163,7 @@ Route::middleware(['auth'])->prefix('laporan')->name('laporan.')->group(function
     Route::get('/', [LaporanController::class, 'index'])->name('index');
     Route::get('/{id}/pdf', [LaporanController::class, 'downloadPdf'])->name('pdf');
     Route::get('/{id}/preview', [LaporanController::class, 'previewPdf'])->name('preview');
-    Route::post('/{id}/approve', [LaporanController::class, 'updateApproval'])->name('approve');
     Route::post('/{id}/email', [LaporanController::class, 'sendEmail'])->name('email');
-    Route::post('/{id}/revisi', [LaporanController::class, 'submitRevisi'])->name('revisi');
 });
 
 // Rute Profil

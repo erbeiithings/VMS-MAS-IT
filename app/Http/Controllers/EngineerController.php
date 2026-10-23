@@ -27,15 +27,18 @@ class EngineerController extends Controller
         // Fitur Sortir (Terbaru / Terlama)
         $sort = $request->get('sort', 'terbaru');
         if ($sort == 'terlama') {
-            $query->oldest();
+            $query->oldest('id_engineer');
         } else {
-            $query->latest();
+            $query->latest('id_engineer');
         }
 
         // Pagination max 10, dan bawa parameter pencarian ke halaman berikutnya
         $engineers = $query->paginate(10)->appends($request->all());
-        
-        return view('master.engineer.index', compact('engineers'));
+
+        // QA #9: catatan tugas aktif per engineer (untuk badge "sedang ditugaskan")
+        $tugasAktif = \App\Models\Kunjungan::tugasAktifPerEngineer();
+
+        return view('master.engineer.index', compact('engineers', 'tugasAktif'));
     }
 
     public function store(Request $request)
@@ -45,7 +48,9 @@ class EngineerController extends Controller
             'username' => 'required|string|max:50|unique:pengguna,username',
             'email' => 'required|email|max:100|unique:pengguna,email',
             'password' => 'required|string|min:6',
-            'kontak' => 'required|string|max:20',
+            'kontak' => ['required', 'string', 'max:20', 'regex:/^\+?[0-9\s\-().]+$/'],
+        ], [
+            'kontak.regex' => 'No. WA hanya boleh berisi angka (boleh diawali +, spasi, strip, titik, kurung).',
         ]);
 
         $user = User::create([
@@ -89,8 +94,10 @@ class EngineerController extends Controller
             'nama' => 'required|string|max:100',
             'username' => 'required|string|max:50|unique:pengguna,username,' . $user->id_pengguna . ',id_pengguna',
             'email' => 'required|email|max:100|unique:pengguna,email,' . $user->id_pengguna . ',id_pengguna',
-            'kontak' => 'required|string|max:20',
+            'kontak' => ['required', 'string', 'max:20', 'regex:/^\+?[0-9\s\-().]+$/'],
             'status_ketersediaan' => 'required|in:Tersedia,Tidak Tersedia',
+        ], [
+            'kontak.regex' => 'No. WA hanya boleh berisi angka (boleh diawali +, spasi, strip, titik, kurung).',
         ]);
 
         $userData = [

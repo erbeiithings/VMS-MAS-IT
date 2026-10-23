@@ -40,10 +40,20 @@ class DashboardController extends Controller
             ->get();
 
         // Oper semua variabelnya ke view dashboard kepala
+        // QA #22: ringkasan pengeluaran engineer yang belum diganti perusahaan
+        $reimbursePerEngineer = \App\Models\Pengeluaran::with('engineer.user')
+            ->where('status_ganti', 'Belum Diganti')
+            ->whereNotNull('id_engineer')
+            ->select('id_engineer', DB::raw('SUM(nominal) as total'), DB::raw('COUNT(*) as jumlah'))
+            ->groupBy('id_engineer')
+            ->orderByDesc('total')
+            ->get();
+        $totalBelumDiganti = $reimbursePerEngineer->sum('total');
+
         return view('dashboard.kepala', compact(
             'totalKunjungan', 'totalCustomer', 'totalEngineer', 'totalTool',
             'kunjunganTerjadwal', 'kunjunganDikerjakan', 'kunjunganSelesai',
-            'recentKunjungan', 'pekerjaanTerbanyak'
+            'recentKunjungan', 'pekerjaanTerbanyak', 'reimbursePerEngineer', 'totalBelumDiganti'
         ));
     }
 
@@ -65,8 +75,19 @@ class DashboardController extends Controller
             ->take(6)
             ->get();
 
+        // QA #22: ringkasan pengeluaran engineer yang belum diganti perusahaan
+        $reimbursePerEngineer = \App\Models\Pengeluaran::with('engineer.user')
+            ->where('status_ganti', 'Belum Diganti')
+            ->whereNotNull('id_engineer')
+            ->select('id_engineer', DB::raw('SUM(nominal) as total'), DB::raw('COUNT(*) as jumlah'))
+            ->groupBy('id_engineer')
+            ->orderByDesc('total')
+            ->get();
+        $totalBelumDiganti = $reimbursePerEngineer->sum('total');
+
         return view('dashboard.pimpinan', compact(
-            'totalKunjungan', 'toolTersedia', 'engineerTersedia', 'kunjunganHariIni', 'kunjunganList'
+            'totalKunjungan', 'toolTersedia', 'engineerTersedia', 'kunjunganHariIni', 'kunjunganList',
+            'reimbursePerEngineer', 'totalBelumDiganti'
         ));
     }
 
@@ -125,6 +146,16 @@ class DashboardController extends Controller
                 ->get();
         }
 
-        return view('dashboard.engineer', compact('engineer', 'kunjunganAktif', 'tugasAktif', 'riwayatKunjungan', 'alertHariIni'));
+        // QA #22: pengeluaran saya yang belum diganti perusahaan
+        $pengeluaranBelumDiganti = 0;
+        $pengeluaranSudahDiganti = 0;
+        if ($engineer) {
+            $pengeluaranBelumDiganti = (int) \App\Models\Pengeluaran::where('id_engineer', $engineer->id_engineer)
+                ->where('status_ganti', 'Belum Diganti')->sum('nominal');
+            $pengeluaranSudahDiganti = (int) \App\Models\Pengeluaran::where('id_engineer', $engineer->id_engineer)
+                ->where('status_ganti', 'Sudah Diganti')->sum('nominal');
+        }
+
+        return view('dashboard.engineer', compact('engineer', 'kunjunganAktif', 'tugasAktif', 'riwayatKunjungan', 'alertHariIni', 'pengeluaranBelumDiganti', 'pengeluaranSudahDiganti'));
     }
 }

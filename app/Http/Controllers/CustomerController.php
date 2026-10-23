@@ -13,13 +13,10 @@ class CustomerController extends Controller
      * Cari customer berdasarkan KODE (bukan id angka),
      * karena URL memakai kode customer, misal: /master/customer/cst26001
      */
-    private function cariCustomer($identifier)
-{
-    // Cek apakah parameter berupa angka (id_customer) atau string (kode)
-    return Customer::where('kode', $identifier)
-                   ->orWhere('id_customer', $identifier)
-                   ->firstOrFail();
-}
+    private function cariCustomer(string $kode)
+    {
+        return Customer::where('kode', $kode)->firstOrFail();
+    }
     // Nampilin halaman utama daftar customer
     public function index(Request $request)
     {
@@ -54,10 +51,12 @@ class CustomerController extends Controller
             'nama_perusahaan' => 'required|string|max:100',
             'alamat' => 'required|string|max:255',
             'pic' => 'required|string|max:100',
-            'telepon' => 'required|string|max:20',
+            'telepon' => ['required', 'string', 'max:20', 'regex:/^\+?[0-9\s\-().]+$/'],
             'email' => 'required|email|max:100',
             'latitude' => 'nullable|string',   // Validasi Latitude (Boleh kosong)
             'longitude' => 'nullable|string',  // Validasi Longitude (Boleh kosong)
+        ], [
+            'telepon.regex' => 'No. Telepon hanya boleh berisi angka (boleh diawali +, spasi, strip, titik, kurung).',
         ]);
 
         // Kode customer berurutan dari Format Nomor (prefix) yang bisa diatur di Master Data
@@ -93,10 +92,12 @@ class CustomerController extends Controller
             'nama_perusahaan' => 'required|string|max:100',
             'alamat' => 'required|string|max:255',
             'pic' => 'required|string|max:100',
-            'telepon' => 'required|string|max:20',
+            'telepon' => ['required', 'string', 'max:20', 'regex:/^\+?[0-9\s\-().]+$/'],
             'email' => 'required|email|max:100',
             'latitude' => 'nullable|string',   // Validasi Latitude
             'longitude' => 'nullable|string',  // Validasi Longitude
+        ], [
+            'telepon.regex' => 'No. Telepon hanya boleh berisi angka (boleh diawali +, spasi, strip, titik, kurung).',
         ]);
 
         // Timpa data lama dengan data baru yang udah tervalidasi
@@ -123,7 +124,7 @@ class CustomerController extends Controller
     public function getSites($kode)
     {
         $customer = $this->cariCustomer($kode);
-        $sites = CustomerSite::where('id_customer', $customer->id_customer)->get();
+        $sites = CustomerSite::where('id_customer', $customer->id_customer)->orderBy('nama_cabang')->get();
         return response()->json($sites);
     }
 }

@@ -126,10 +126,10 @@ class DummyDataSeeder extends Seeder
 
         // ================= DATA ENGINEER (butuh akun pengguna role Engineer) =================
         $engineers = [
-            ['nama' => 'Andi Pratama', 'username' => 'andi.engineer', 'email' => 'andi@mas-it.id', 'kontak' => '081234567101'],
-            ['nama' => 'Siti Rahayu', 'username' => 'siti.engineer', 'email' => 'siti@mas-it.id', 'kontak' => '081234567102'],
-            ['nama' => 'Joko Susilo', 'username' => 'joko.engineer', 'email' => 'joko@mas-it.id', 'kontak' => '081234567103'],
-            ['nama' => 'Putri Ananda', 'username' => 'putri.engineer', 'email' => 'putri@mas-it.id', 'kontak' => '081234567104'],
+            ['nama' => 'Andi Pratama', 'username' => 'andi.engineer', 'email' => 'andi@example.com', 'kontak' => '081234567101'],
+            ['nama' => 'Siti Rahayu', 'username' => 'siti.engineer', 'email' => 'siti@example.com', 'kontak' => '081234567102'],
+            ['nama' => 'Joko Susilo', 'username' => 'joko.engineer', 'email' => 'joko@example.com', 'kontak' => '081234567103'],
+            ['nama' => 'Putri Ananda', 'username' => 'putri.engineer', 'email' => 'putri@example.com', 'kontak' => '081234567104'],
         ];
 
         foreach ($engineers as $e) {

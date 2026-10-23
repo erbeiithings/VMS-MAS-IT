@@ -32,9 +32,9 @@ class ToolController extends Controller
         // Fitur Sortir
         $sort = $request->get('sort', 'terbaru');
         if ($sort == 'terlama') {
-            $query->oldest();
+            $query->oldest('id_tool');
         } else {
-            $query->latest();
+            $query->latest('id_tool');
         }
 
         $tools = $query->withSum(['peminjaman as sedang_dipinjam' => function ($q) {

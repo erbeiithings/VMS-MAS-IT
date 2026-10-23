@@ -19,9 +19,9 @@ class DatabaseSeeder extends Seeder
 
         // 2. Akun Pengguna
         $adminId = DB::table('pengguna')->insertGetId([
-            'nama' => 'Simon Lamakadu',
-            'username' => 'simon',
-            'email' => 'simon@mas-it.id',
+            'nama' => 'Administrator',
+            'username' => 'admin',
+            'email' => 'admin@example.com',
             'password' => Hash::make('masitno1indonesia'),
             'kontak' => '0818788831',
             'id_role' => 1,
@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
         $pimpinanId = DB::table('pengguna')->insertGetId([
             'nama' => 'Pimpinan',
             'username' => 'pimpinan',
-            'email' => 'pimpinan@mas-it.id',
+            'email' => 'pimpinan@example.com',
             'password' => Hash::make('masitno1indonesia'),
             'kontak' => '081234567891',
             'id_role' => 2,

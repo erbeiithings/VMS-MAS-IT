@@ -163,14 +163,26 @@
 
     <!-- Ringkasan Pekerjaan & Waktu Aktual -->
     @php
-        $gpsIn = ($kunjungan->check_in_latitude && $kunjungan->check_in_longitude)
+        $gpsInRaw = ($kunjungan->check_in_latitude && $kunjungan->check_in_longitude)
             ? $kunjungan->check_in_latitude.', '.$kunjungan->check_in_longitude
             : ($aktivitas->lokasi ?? '-');
-        $gpsOut = ($aktivitas->lokasi_checkout ?? null)
+        $gpsOutRaw = ($aktivitas->lokasi_checkout ?? null)
             ? $aktivitas->lokasi_checkout
             : (($kunjungan->check_out_latitude && $kunjungan->check_out_longitude)
                 ? $kunjungan->check_out_latitude.', '.$kunjungan->check_out_longitude
                 : '-');
+        // GPS presisi & seragam: selalu 6 desimal, lat & long di baris masing-masing
+        // agar tidak wrap sembarangan di kolom sempit.
+        $formatGps = function ($val) {
+            if (!$val || trim($val) === '' || trim($val) === '-') return '-';
+            $parts = preg_split('/\s*,\s*/', trim($val));
+            if (count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
+                return number_format((float)$parts[0], 6, '.', '').',<br>'.number_format((float)$parts[1], 6, '.', '');
+            }
+            return e($val);
+        };
+        $gpsIn = $formatGps($gpsInRaw);
+        $gpsOut = $formatGps($gpsOutRaw);
     @endphp
     <table class="data-table">
         <thead>
@@ -196,11 +208,11 @@
                 </td>
                 <td>
                     {{ $aktivitas->waktu_mulai ? date('d/m/Y H:i', strtotime($aktivitas->waktu_mulai)) : '-' }}<br>
-                    <small style="color: #003399; font-size: 8px;">GPS: {{ $gpsIn }}</small>
+                    <small style="color: #003399; font-size: 8px; line-height: 1.5;">GPS: {!! $gpsIn !!}</small>
                 </td>
                 <td>
                     {{ $aktivitas->waktu_selesai ? date('d/m/Y H:i', strtotime($aktivitas->waktu_selesai)) : '-' }}<br>
-                    <small style="color: #003399; font-size: 8px;">GPS: {{ $gpsOut }}</small>
+                    <small style="color: #003399; font-size: 8px; line-height: 1.5;">GPS: {!! $gpsOut !!}</small>
                 </td>
             </tr>
         </tbody>

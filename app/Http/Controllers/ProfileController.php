@@ -36,9 +36,11 @@ class ProfileController extends Controller
         // Validasi input
         $request->validate([
             'email' => 'required|email|unique:pengguna,email,' . $user->id_pengguna . ',id_pengguna',
-            'kontak' => 'required|string|max:20',
+            'kontak' => ['required', 'string', 'max:20', 'regex:/^\+?[0-9\s\-().]+$/'],
             'password_lama' => 'required|string',
             'password_baru' => 'nullable|string|min:6|confirmed',
+        ], [
+            'kontak.regex' => 'No. HP hanya boleh berisi angka (boleh diawali +, spasi, strip, titik, kurung).',
         ]);
 
         // Verifikasi password lama sebelum izinkan perubahan

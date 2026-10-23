@@ -77,6 +77,18 @@ class LaporanController extends Controller
         $pdfPath = $tmpBase . '.pdf';
         file_put_contents($pdfPath, $pdf->output());
 
+        // Jika pdftoppm tidak tersedia (umum di shared hosting), fallback:
+        // kembalikan URL PDF langsung agar tetap bisa di-preview di browser.
+        $pdftoppm = trim((string) @shell_exec('command -v pdftoppm 2>/dev/null'));
+        if ($pdftoppm === '') {
+            @unlink($pdfPath);
+            @unlink($tmpBase);
+            return response()->json([
+                'images' => [],
+                'pdf_url' => route('laporan.pdf', $kunjungan->nomor) . '?t=' . time(),
+            ])->header('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+        }
+
         $images = [];
         $pngPrefix = $tmpBase . '_page';
         exec('pdftoppm -png -r 80 ' . escapeshellarg($pdfPath) . ' ' . escapeshellarg($pngPrefix) . ' 2>/dev/null');
@@ -177,10 +189,7 @@ class LaporanController extends Controller
             'customer', 'engineer.user', 'tools', 'aktivitas', 'dokumentasi', 'laporan.buktiPenyelesaian'
         ])->where('nomor', $id_kunjungan)->firstOrFail();
 
-        // Pastikan laporan sudah di-ACC sebelum dikirim
-        if ($kunjungan->laporan->status_approval != 'Disetujui') {
-            return back()->with('error', 'Gagal! Laporan harus disetujui (ACC) oleh atasan sebelum dikirim ke klien.');
-        }
+        // (Cek ACC dihapus — kirim langsung tanpa persetujuan atasan)
 
         // Opsional: Cek apakah customer punya email di database (asumsi kolomnya 'email')
         $emailTujuan = $kunjungan->customer->email ?? 'dummyclient@mailinator.com'; // Ganti fallback-nya kalau kolom email nggak ada
@@ -195,8 +204,37 @@ class LaporanController extends Controller
         
         $pdfData = $pdf->output();
 
-        // Eksekusi pengiriman email
-        Mail::to($emailTujuan)->send(new LaporanCustomerMail($kunjungan, $pdfData));
+        // Eksekusi pengiriman email via Resend API (HTTPS)
+        // HTML diambil dari mailable asli agar template tetap bagus
+        try {
+            $resendKey = env('RESEND_API_KEY');
+            if (!$resendKey) {
+                throw new \Exception('RESEND_API_KEY belum diset di .env');
+            }
+            $mailable = new LaporanCustomerMail($kunjungan, $pdfData);
+            $emailHtml = $mailable->render();
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'Authorization' => 'Bearer ' . $resendKey,
+                'Content-Type' => 'application/json',
+            ])->post('https://api.resend.com/emails', [
+                'from' => 'MAS-IT <onboarding@resend.dev>',
+                'to' => [$emailTujuan],
+                'subject' => 'Berita Acara Penyelesaian Pekerjaan - ' . $kunjungan->nomor,
+                'html' => $emailHtml,
+                'attachments' => [
+                    [
+                        'filename' => 'laporan-' . $kunjungan->nomor . '.pdf',
+                        'content' => base64_encode($pdfData),
+                    ],
+                ],
+            ]);
+            if ($response->failed()) {
+                throw new \Exception('Resend API error: ' . substr($response->body(), 0, 200));
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Gagal kirim email laporan '.$kunjungan->nomor.' ke '.$emailTujuan.': '.$e->getMessage());
+            return back()->with('error', 'Gagal mengirim email ke '.$emailTujuan.'. (Detail: '.substr($e->getMessage(), 0, 120).')');
+        }
 
         return back()->with('success', 'Berhasil! Email Berita Acara beserta PDF terkirim ke: ' . $emailTujuan);
     }
@@ -211,15 +249,19 @@ class LaporanController extends Controller
             'catatan_revisi' => 'required|string'
         ]);
 
-        $laporan = Laporan::findOrFail($id_laporan);
+        $laporan = Laporan::with('kunjungan.aktivitas')->findOrFail($id_laporan);
 
-        // Ubah target simpan langsung ke kolom hasil_pekerjaan di tabel laporans
-        $laporan->hasil_pekerjaan = $request->catatan_revisi;
+        // 1. Update catatan/deskripsi pada aktivitas kunjungan terakhir
+        $aktivitas = $laporan->kunjungan->aktivitas->last();
+        if ($aktivitas) {
+            $aktivitas->catatan = $request->catatan_revisi;
+            $aktivitas->save();
+        }
 
-        // Ubah status laporan kembali menjadi Menunggu Persetujuan
+        // 2. Ubah status laporan kembali menjadi Menunggu Persetujuan
         $laporan->status_approval = 'Menunggu Persetujuan';
         
-        // Kosongkan kembali catatan dari atasan karena sudah direvisi
+        // 3. Kosongkan kembali catatan dari atasan karena sudah direvisi
         $laporan->catatan_approval = null; 
         
         $laporan->save();
