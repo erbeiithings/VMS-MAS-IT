@@ -1,129 +1,172 @@
-🏢 MAS-IT VMS (Visit Management System)
+# MAS-IT VMS (Visit Management System)
 
-MAS-IT VMS adalah Sistem Informasi berbasis web yang dirancang untuk mengelola, mencatat, dan memonitor data kunjungan (visit) serta aktivitas pekerjaan lapangan engineer. Sistem ini memudahkan lacak jadwal kunjungan, pelaporan hasil pekerjaan secara digital, dan proses persetujuan oleh tingkat Kepala maupun Pimpinan.
+Halo, ini MAS-IT VMS. Aplikasi web buat ngatur kunjungan engineer ke lokasi customer, dari awal dijadwalkan sampai laporannya jadi PDF dan ditandatangani.
 
-✨ Fitur Utama
+Singkatnya, kalau dulu jadwal, laporan, dan tools engineer tersebar di chat dan catatan lepas, di sini semuanya ketemu di satu tempat: siapa yang ditugaskan, ke mana, ngapain aja di lapangan, habis berapa, dan laporannya sudah disetujui atau belum.
 
-Multi-Role Access & Authentication: Hak akses terpisah dengan proteksi sesi untuk Kepala Pimpinan, Pimpinan, dan Engineer.
+> Catatan penting: repo ini dipakai sebagai jejak dan arsip kode. Situs live tidak otomatis berubah kalau repo ini diubah, deploy ke production dilakukan terpisah.
 
-Manajemen & Penjadwalan Kunjungan: Pencatatan jadwal tugas lapangan, penugasan Lead/Support Engineer, dan tracking status kunjungan.
+## Fitur utamanya
 
-Presensi & Geolocation: Validasi titik lokasi (GPS) untuk proses check-in dan check-out kunjungan lapangan.
+### Jadwal dan penugasan
 
-Pelaporan & Ekspor PDF: Pengisian aktivitas pekerjaan, upload bukti fisik/dokumentasi, serta cetak laporan PDF (Barryvdh DomPDF).
+- Buat jadwal kunjungan: pilih customer, site atau cabang, tanggal dan waktu, pekerjaan, patokan lokasi, lead engineer, tim support sampai 4 orang, dan tools yang dibawa.
+- Nomor kunjungan dibuat otomatis, contohnya `vmsmit26001`. Customer, tool, dan engineer juga punya kode otomatis sendiri (`cst...`, `tls...`, `eng...`).
+- Engineer yang ditugaskan bisa Terima atau Tolak. Kalau ditolak, Pimpinan yang memutuskan: ACC penolakan lalu ganti engineer, atau tolak penolakannya supaya tugas tetap jalan.
 
-Monitoring & Dashboard Analytics: Visualisasi KPI, distribusi status kunjungan, dan riwayat pekerjaan secara real-time.
+### Kerja di lapangan
 
-User Management: Pengelolaan akun pengguna beserta kontrol status keaktifan (Aktif/Nonaktif).
+- Check-in dan check-out pakai GPS, jadi waktu dan lokasi tercatat otomatis.
+- Upload foto dokumentasi langsung dari HP, lengkap dengan kategorinya.
+- Catat pengeluaran operasional, lengkap dengan jenis biaya, nominal, keterangan, dan bukti nota.
+- Status kunjungan jelas: Terjadwal, Dikonfirmasi, Dikerjakan, Selesai, dan Reschedule.
 
-💻 Tech Stack
+### Laporan dan approval
 
-Framework: Laravel 10
+- Laporan dibuat dalam 2 bagian: isi data laporan, lalu tanda tangan customer dan engineer.
+- Bisa juga lewati tanda tangan, tapi wajib isi alasan.
+- Draft laporan dan draft tanda tangan tersimpan otomatis, jadi aman kalau halaman ke-refresh.
+- Setelah selesai, laporan masuk ke approval: Disetujui, Revisi, atau Ditolak oleh Pimpinan atau Kepala Pimpinan.
+- Kalau Revisi, engineer isi ulang laporannya dan statusnya balik jadi Menunggu Persetujuan. Kalau sudah Disetujui, laporan terkunci dan tidak bisa direvisi lagi.
+- Laporan bisa dicetak jadi PDF dan dikirim ke klien lewat email.
 
-Bahasa Pemrograman: PHP (Minimal v8.1)
+### Tools dan master data
 
-Database: MySQL
+- Inventaris tools lengkap dengan stok total, stok terkini, dan kondisi alat.
+- Engineer bisa pinjam tools buat keperluan lain dan mengembalikannya lewat menu Tools Saya, dengan kondisi Baik, Rusak Ringan, atau Rusak Berat.
+- Master data yang dikelola: Data Pengguna, Data Customer, Data Site, Tools dan Alat Kerja, Format Nomor, dan Opsi Formulir.
+- Opsi Formulir dipakai buat ngatur daftar Jenis Biaya dan Kategori Foto yang muncul di formulir lapangan.
 
-Styling & UI: Tailwind CSS (via CDN) & Custom Components
+### Dashboard per role
 
-Pustaka Utama: barryvdh/laravel-dompdf (Generasi Laporan PDF)
+Setiap role punya dashboardnya sendiri, jadi yang dilihat langsung sesuai kerjaannya:
 
-🛠️ Persyaratan Sistem (Prerequisites)
+| Role | Fokusnya | Yang bisa dilakukan |
+| --- | --- | --- |
+| Kepala Pimpinan | Monitoring dan analisis strategis | Lihat semua data, kelola Data Pengguna termasuk Kelola Pimpinan, hapus kunjungan, approval laporan |
+| Pimpinan | Operasional dan penjadwalan | Buat jadwal, ganti engineer, ACC atau tolak penolakan, approval laporan, tandai pengeluaran sudah atau belum diganti |
+| Engineer | Area tugas lapangan | Lihat tugasnya sendiri, konfirmasi tugas, check-in dan check-out GPS, upload foto, catat pengeluaran, isi laporan, pinjam dan kembalikan tools |
 
-Sebelum menjalankan project ini secara lokal, pastikan perangkat kamu sudah terinstal:
+Yang perlu diingat soal menu:
 
-PHP: Versi >= 8.1
+- Admin dan Pimpinan menunya sama persis, tapi Pimpinan tidak melihat tombol Hapus di daftar Kunjungan dan tidak melihat tombol Kelola Pimpinan di Data Pengguna.
+- Engineer tidak punya menu Master Data sama sekali. Di Kunjungan, Engineer tidak punya tombol Buat Jadwal dan Hapus. Di Laporan, Engineer tidak punya tombol Revisi.
+- Profil untuk semua role hanya lewat dropdown akun, bukan menu utama.
 
-Composer: Untuk manajemen dependency PHP
+## Alurnya, dari awal sampai selesai
 
-MySQL Database Server: (via XAMPP, Laragon, atau MySQL Standalone)
+1. Pimpinan atau Kepala Pimpinan buat jadwal kunjungan.
+2. Sistem bikin nomor kunjungan otomatis, statusnya Terjadwal.
+3. Engineer Terima atau Tolak penugasan.
+4. Engineer check-in GPS di lokasi, status jadi Dikerjakan.
+5. Engineer kerja, upload foto, dan catat pengeluaran.
+6. Engineer isi laporan, lalu customer dan engineer tanda tangan (atau lewati tanda tangan dengan alasan).
+7. Engineer check-out GPS, status jadi Selesai.
+8. Pimpinan atau Kepala Pimpinan approval laporan: Disetujui, Revisi, atau Ditolak.
+9. Kalau Disetujui, laporan bisa dicetak PDF dan dikirim ke klien. Engineer mengembalikan tools yang dipakai.
 
-Git: Untuk clone repository
+Pengecualian yang juga sudah ditangani: Reschedule kalau jadwal perlu diatur ulang, Force Selesai dari Pimpinan atau Kepala kalau engineer lupa check-out, revisi tools yang terkunci setelah check-in, dan edit atau hapus foto dan pengeluaran oleh yang berwenang.
 
-🚀 Panduan Instalasi Lokal (Local Setup)
+## Tech stack
 
-Ikuti langkah-langkah berikut secara berurutan untuk menjalankan aplikasi di lingkungan development:
+- Framework: Laravel 10
+- Bahasa: PHP minimal 8.1
+- Database: MySQL
+- UI: Tailwind CSS lewat CDN, jadi tidak perlu build Node.js
+- PDF: barryvdh/laravel-dompdf
+- Email laporan ke klien: Resend API (opsional, lihat bagian konfigurasi)
 
-1. Clone Repository
+## Cara jalanin di laptop kamu
 
-Buka terminal atau Command Prompt, lalu jalankan:
+### Yang perlu disiapkan dulu
 
+- PHP minimal 8.1
+- Composer
+- MySQL, bisa lewat XAMPP, Laragon, atau MySQL standalone
+- Git
+
+### Langkah-langkahnya
+
+```bash
 git clone https://github.com/erbeiithings/VMS-MAS-IT.git
 cd VMS-MAS-IT
-
-
-2. Install Dependencies
-
-Unduh semua pustaka backend yang dibutuhkan menggunakan Composer:
-
 composer install
+```
 
+Salin file environment, lalu generate key-nya:
 
-> Note: Aplikasi ini menggunakan Tailwind CSS via CDN, sehingga tidak membutuhkan build process Node.js (npm install / npm run dev).
-
-3. Konfigurasi Environment (.env)
-
-Salin file .env.example menjadi .env:
-
+```bash
 cp .env.example .env
-
-
-Generate Application Key:
-
 php artisan key:generate
+```
 
+Buat database baru, misalnya `vms_masit`, lalu sesuaikan isi `.env` kamu:
 
-4. Setup Database
-
-Nyalakan Service Apache dan MySQL di Control Panel (XAMPP/Laragon).
-
-Buka phpMyAdmin (http://localhost/phpmyadmin) dan buat database baru bernama:
-vms_masit
-
-Sesuaikan konfigurasi database pada file .env kamu:
-
+```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=vms_masit
 DB_USERNAME=root
 DB_PASSWORD=
+```
 
+Isi `DB_PASSWORD` sesuai password MySQL di laptop kamu, jangan dikosongkan kalau MySQL kamu pakai password.
 
-5. Migrasi & Seeding Database
+Terus jalankan migrasi dan seeder bawaan:
 
-Jalankan perintah ini untuk membuat struktur tabel dan mengisi data awal (dummy/account testing):
-
+```bash
 php artisan migrate:fresh --seed
+```
 
+Seeder bawaan ini mengisi role (Kepala Pimpinan, Pimpinan, Engineer), akun admin dan pimpinan, dan format nomor awal. Kalau mau data contoh yang lebih lengkap, ada seeder tambahan yang bisa dijalankan manual:
 
-6. Link Storage Asset
+```bash
+php artisan db:seed --class=DummyDataSeeder
+php artisan db:seed --class=DemoTransactionSeeder
+```
 
-Hubungkan direktori storage privat ke folder public agar file/foto dokumentasi yang diunggah dapat diakses di browser:
+Terakhir, hubungkan storage dan jalankan servernya:
 
+```bash
 php artisan storage:link
-
-
-7. Jalankan Local Development Server
-
-Jalankan server lokal bawaan Laravel:
-
 php artisan serve
+```
 
+Buka di browser: http://127.0.0.1:8000
 
-Akses aplikasi melalui browser di alamat: http://127.0.0.1:8000
+### Konfigurasi tambahan
 
-📱 Pengujian Fitur GPS di Perangkat HP (Jaringan Lokal)
+- **Kirim email laporan:** isi `RESEND_API_KEY` di `.env` kalau mau fitur Kirim Klien jalan. Kalau key ini tidak diisi, pengiriman email akan gagal dengan pesan error, tapi fitur lainnya tetap jalan.
+- **Upload foto dan dokumen:** `php artisan storage:link` itu wajib, supaya file yang diupload bisa dibuka dari browser.
+- **GPS di HP:** kalau mau ngetes dari HP yang satu WiFi dengan laptop, jalankan server dengan host terbuka:
 
-Jika pengujian dilakukan melalui perangkat HP dalam satu jaringan WiFi:
-
-Jalankan server dengan menyertakan host IP:
-
+```bash
 php artisan serve --host=0.0.0.0 --port=8000
+```
 
+Cek IP lokal laptop kamu (di Windows lewat `ipconfig`), lalu buka dari browser HP ke `http://<IP_LAPTOP>:8000`. Kalau browser HP memblokir GPS karena koneksinya HTTP, aktifkan flag "Insecure origins treated as secure" di `chrome://flags` atau `brave://flags` untuk URL IP lokal kamu.
 
-Cek IP lokal laptop kamu (via ipconfig di CMD).
+## Struktur proyek, biar gampang nyari file
 
-Akses via browser HP menggunakan alamat http://<IP_LAPTOP>:8000.
+```text
+app/Http/Controllers/   # Logika tiap halaman: kunjungan, laporan, master data, tools, profil
+app/Models/             # Model: pengguna, engineer, customer, kunjungan, laporan, dan kawan-kawan
+database/migrations/    # Struktur tabel, 38 migrasi
+database/seeders/       # Data awal: role, akun, format nomor, data contoh
+resources/views/        # Tampilan Blade: auth, dashboard, kunjungan, laporan, master, peminjaman, profile
+routes/web.php          # Semua route web, lengkap dengan pembatasan role
+public/                 # File yang bisa diakses browser: index.php, favicon, logo, uploads
+```
 
-Jika browser HP memblokir fitur lokasi/GPS karena koneksi HTTP, aktifkan flag "Insecure origins treated as secure" pada chrome://flags atau brave://flags untuk URL IP lokal kamu.
+## Keamanan, tolong dibaca dulu
+
+- Jangan pernah commit file `.env` asli ke repo. File itu isinya kredensial production dan tidak boleh tersebar.
+- Jangan upload dump database production ke repo. Isinya data asli customer dan pengguna.
+- Setelah install dan seed di lingkungan baru, segera ganti password akun bawaan lewat menu Profil, dan buat password tiap role berbeda, jangan disamakan.
+- Username hanya bisa diubah 1 kali dalam 7 hari, jadi pikir dulu sebelum ganti.
+- Halaman yang dibatasi role akan menampilkan 403 Akses Ditolak kalau dibuka oleh role yang tidak berhak, itu memang sengaja.
+
+## Mau ikut ngembangin?
+
+Silakan. Alur paling aman: clone repo, jalanin lokal dulu, ubah di branch baru, tes login ketiga role (Kepala Pimpinan, Pimpinan, Engineer) sebelum push. Kalau ada yang bingung soal alur bisnisnya, cek dokumen analisis di repo atau tanya langsung ke pemilik proyek, jangan nebak-nebak dari nama tabel saja, karena beberapa halaman di aplikasi ini memakai kode di URL (nomor tiket, kode customer, dan kode tool), bukan ID angka.
